@@ -13,8 +13,8 @@ cannot be verified by running something, it is not a criterion.
 
 | Phase | State | What is left |
 | --- | --- | --- |
-| 0 | Partly done | 0.3 measured locally (`docs/spikes.md`). 0.1, 0.2 and 0.4 need the account: deploy `spikes/` and run `scripts/run-spikes.mjs` |
-| 1 | Built, tested locally | Deploy to `workers.dev` and run the 60 second demo against the deployed URL. The model's rule on the trap scenario is not yet measured (0.4) |
+| 0 | All four spikes measured (`docs/spikes.md`); 0.4 measured **negative** | 0.4's structured-output approach fails on the account (0/30 valid JSON). Implement and re-measure PLAN.md's fallback list, starting with flattening the `RuleAST` schema |
+| 1 | Built, tested locally, deployed | `https://portcullis.pragyna-portcullis.workers.dev` is live and serving. The 60-second demo has not yet been driven against the deployed URL in a browser. The model's rule step will fail visibly on this account until 0.4's fallback is built (0.4 measured, see Phase 0) |
 | 2 | Built, tested | Abhishek to review the grammar in DESIGN.md section 7 |
 | 3 to 7 | Not started | |
 

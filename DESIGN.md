@@ -74,8 +74,12 @@ build has a target.
 The percentages above were placeholders written before implementation. Measured since, on the
 simulator for the committed scenario and seed (docs/spikes.md): the naive rule blocks 62.3% of
 attack and **46.3% of legitimate** traffic. A precise hand-written rule blocks 100% and 0%. What the
-real model's rule achieves is UNVERIFIED until spike 0.4 runs on the account. The demo with the fake
-model runs end to end locally today; the "hypothesis" and "report and lesson" beats are Phase 4.
+real model's rule achieves is measured now (docs/spikes.md, 0.4), and it is a negative result: 0/30
+attempts against the real model produced valid JSON at all, so no real-model rule has yet passed
+replay. The AST-as-nested-JSON-Schema encoding needs a fallback (PLAN.md's ordered list, starting
+with flattening the schema) before this demo beat is achievable with the real model. The demo with
+the fake model runs end to end locally today; the "hypothesis" and "report and lesson" beats are
+Phase 4.
 
 ## 4. Architecture
 
@@ -205,11 +209,13 @@ Two chunk drivers exist. On page load the browser calls `generateTrafficChunk` o
 the WebSocket; the docs say each WebSocket message refreshes the budget. Inside the investigation,
 Workflow steps loop over chunks calling the Agent over Durable Object RPC.
 
-UNVERIFIED, and Phase 0 spike 0.2 must measure it on the account: the second driver relies on a
-**Durable Object RPC call counting as an incoming request that refreshes the CPU budget**. The docs
-say the budget is refreshed by "each incoming HTTP request or WebSocket message" and do not state
-whether a plain RPC method call qualifies. If it does not, the Workflow's chunk loops switch to
-`fetch()` on the Agent stub. The spike Worker in `spikes/` measures exactly this.
+Measured on the account (docs/spikes.md, 0.2): a single Durable Object RPC call to a CPU-burning
+method did not trigger `exceededCpu` at up to 512,000,000 loop iterations, well beyond what a real
+chunk call does. No measurement forced a change away from RPC. This does not fully confirm the
+original question (whether RPC specifically gets its own refreshed budget, as opposed to the account
+simply not being CPU-limited at 10 ms on this call path) — see docs/spikes.md for the two
+explanations left open. If `exceededCpu` appears in production logs, the Workflow's chunk loops
+switch to `fetch()` on the Agent stub instead; that is a change to `src/server/workflow.ts` only.
 
 Fallback if generation cannot be made to fit even when chunked: precompute scenarios at build time.
 The simulator is a pure seeded function, so build-time generation is equivalent by construction,
@@ -836,9 +842,10 @@ Run by the eval harness against the fake model and against the real one:
 The harness caches model responses by hash of `(scenario, prompt, model)` so re-runs and ablations
 are nearly free and reported metrics are reproducible. This matters because the Workers AI rate
 limit for text generation is 300 requests per minute by default, but 20 per minute for models that
-require the Workers Paid plan. Whether `@cf/meta/llama-3.3-70b-instruct-fp8-fast` is in that
-category is UNVERIFIED; the model reference pages are generated from a data source that is not in
-the docs repository, so it could not be read in this session. Phase 0 checks it against the account.
+require the Workers Paid plan. Measured on the account (docs/spikes.md, 0.1):
+`@cf/meta/llama-3.3-70b-instruct-fp8-fast` served 400/400 requests with zero rate-limiting at
+~15.3 req/s sustained, well above the 20/min figure for the Paid-only tier and consistent with the
+300/min default tier. The exact ceiling was not found (the spike never triggered a 429).
 
 **No metric in this document has been measured.** Every number here is a placeholder or a threshold.
 The README will carry measured numbers or state that none exist yet.
@@ -950,18 +957,26 @@ Explicitly out of scope. Listed so that the absence of each is a decision rather
 
 ## 13. Open items
 
-1. Whether `@cf/meta/llama-3.3-70b-instruct-fp8-fast` is callable on a Workers Free account, and at
-   what rate limit. UNVERIFIED; the docs suggest yes at 300 per minute (docs/spikes.md, 0.1). The
-   planned fallback, `@cf/meta/llama-3.1-8b-instruct`, was deprecated on 2026-05-30, so a new
-   fallback must be chosen if 0.1 fails.
-2. Whether a Durable Object RPC call refreshes the 10 ms CPU budget. UNVERIFIED (docs/spikes.md,
-   0.2). The Workflow's chunk loops use RPC until measured.
-3. Structured output reliability for rule drafting. UNVERIFIED (docs/spikes.md, 0.4). The harness
-   is built; it needs the account.
+1. ~~Whether `@cf/meta/llama-3.3-70b-instruct-fp8-fast` is callable on the account, and at what rate
+   limit~~. Closed: measured on the account, 400/400 requests succeeded, zero rate-limited, ~15.3
+   req/s sustained (docs/spikes.md, 0.1). No fallback model needed.
+2. ~~Whether a Durable Object RPC call refreshes the 10 ms CPU budget~~. Measured on the account
+   (docs/spikes.md, 0.2): no single RPC call triggered `exceededCpu` up to 512,000,000 loop
+   iterations. Kept RPC for the chunk loops; the deeper question of whether this account enforces
+   the 10 ms budget at all on this call path stays open, see docs/spikes.md 0.2.
+3. **Structured output reliability for rule drafting. MEASURED and failing** (docs/spikes.md, 0.4):
+   0/30 attempts against the real model produced valid JSON. The model runs away into an unboundedly
+   deep nested `"or"` chain and gets truncated by `max_tokens` before closing. The AST-as-nested-
+   JSON-Schema encoding is not usable as designed with this model. **Not yet done:** implement and
+   re-measure PLAN.md's ordered fallback list, starting with flattening the schema to a node-list
+   with integer parent references (the most likely fix given the measured failure mode). Until this
+   is fixed, the model-drafted-rule step of the Phase 1 demo fails visibly rather than producing a
+   rule.
 4. ~~Measured requests-per-10 ms~~. Closed: `CHUNK_SIZE = 500`, `requestCount = 6000`, measured
    locally (docs/spikes.md, 0.3). Re-check `exceededCpu` on the account.
 5. Grammar. Implemented as section 7 describes; Abhishek to review and own it.
 6. Repo name. The assignment specifies `cf_sw_project`; this repository is `cf-swe-project`. Worth
    reconciling before submission since the name was an explicit requirement.
-7. Nothing has been deployed. Deploying needs the account; the local demo runs with
-   `wrangler dev --local` and the fake model (README).
+7. ~~Nothing has been deployed~~. `spikes/` is deployed to `pragyna-portcullis.workers.dev`
+   (docs/spikes.md). The main app (`portcullis`) deploy is tracked separately in PLAN.md's Phase 1
+   status.

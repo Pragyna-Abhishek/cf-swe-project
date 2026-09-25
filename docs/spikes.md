@@ -3,19 +3,22 @@
 Every number the design relies on lives here, with its date, where it was measured, and on what.
 Cite this file rather than restating a number from memory.
 
-**Target account tier:** Workers Free.
+**Target account tier:** Workers Free (as stated in PLAN.md). The account's actual billing tier
+could not be confirmed from the API token used here (`GET /accounts/:id/subscriptions` returned an
+authentication error, likely a token-scope limit, not a tier answer) — marked UNVERIFIED below where
+it matters.
 
-**Where these were measured:** a development container with no Cloudflare credentials. Anything that
-needs the real account (0.1, 0.2, 0.4) is **not yet measured**. The tooling to measure it is built
-and smoke-tested; section "How to run the account spikes" below says how. Until someone runs it,
-those items stay UNVERIFIED in DESIGN.md.
+**Where these were measured:** 0.1, 0.2 and 0.4 were run 2026-09-25 against the real account, via
+`portcullis-spikes.pragyna-portcullis.workers.dev` (a `workers.dev` subdomain registered on this
+account for the spike Worker; none existed before). Raw results are in `docs/spike-results/`. 0.3 is
+unchanged, measured locally.
 
-| Spike | Status | Decision taken meanwhile |
+| Spike | Status | Decision taken |
 | --- | --- | --- |
-| 0.1 Model usable on the account, and its rate limit | NOT MEASURED (needs the account) | Keep `@cf/meta/llama-3.3-70b-instruct-fp8-fast`. Fallback changed, see below |
-| 0.2 Does a Durable Object RPC call refresh the CPU budget | NOT MEASURED (needs the account) | Provisional: RPC. One interface to change if wrong |
+| 0.1 Model usable on the account, and its rate limit | MEASURED on account, 2026-09-25 | Keep `@cf/meta/llama-3.3-70b-instruct-fp8-fast`. No fallback needed |
+| 0.2 Does a Durable Object RPC call refresh the CPU budget | MEASURED on account, 2026-09-25 (partial, see below) | Keep RPC; no failure was found to force a change |
 | 0.3 How many requests fit in 10 ms | MEASURED locally, 2026-09-25 | `CHUNK_SIZE = 500`, `requestCount = 6000` |
-| 0.4 Structured output reliability | NOT MEASURED (needs the account) | AST JSON with a nested JSON Schema, as designed |
+| 0.4 Structured output reliability | MEASURED on account, 2026-09-25 — **fails** | AST JSON with a nested JSON Schema is not usable as designed. Fallback needed; not yet built. See below |
 
 ## 0.3 CPU per chunk
 
@@ -74,7 +77,24 @@ column kind (`and`, `or`, `not`, `contains` with `lower()`, string `in`, number 
 "verify" column runs the whole pipeline (decode, limits, type check, print, parse, round trip) on a
 realistic rule. Both are inside budget.
 
-## 0.1 Model availability and rate limit (NOT MEASURED)
+## 0.1 Model availability and rate limit (MEASURED)
+
+Measured 2026-09-25 against the deployed spike Worker
+(`portcullis-spikes.pragyna-portcullis.workers.dev`), calling `/model/probe` (a tiny JSON-mode
+prompt, `max_tokens: 16`), 400 requests in waves of 20 concurrent. Command:
+`node scripts/run-spikes.mjs <url> model-rate 400`. Raw result:
+`docs/spike-results/0.1-model-rate.json`.
+
+| Requests sent | Succeeded | Rate-limited | Elapsed | Sustained rate |
+| ---: | ---: | ---: | ---: | ---: |
+| 400 | 400 | 0 | 26.1 s | ~15.3 req/s |
+
+**The model is usable on this account and no fallback is needed.** 400/400 succeeded with kind
+`"ok"`; the driver never observed `kind: "rate-limited"`, so the true rate-limit ceiling was not
+found, only that it sits above ~15.3 req/s sustained (and above 20 concurrent in a wave), which is
+already above the docs' 300/min (5/s) figure for the default tier and far above the 20/min (0.33/s)
+figure for the Workers-Paid-only tier. This is consistent with (but does not by itself confirm)
+Llama 3.3 70B fp8-fast being on the default tier, as PLAN.md's reading of the changelog assumed.
 
 What the docs say, read 2026-09-25 from the `cloudflare/cloudflare-docs` repository:
 
@@ -104,24 +124,43 @@ changelog, all UNVERIFIED for JSON mode support: `@cf/meta/llama-3.1-8b-instruct
 Also from the docs: error `3036` means the daily neuron allocation is used up and `3040` means out
 of capacity. `src/model/workers-ai.ts` treats both like a 429, so the step retries with backoff.
 
-## 0.2 CPU budget refresh per transport (NOT MEASURED)
+## 0.2 CPU budget refresh per transport (MEASURED, partial)
 
-The docs say the budget is refreshed by "each incoming HTTP request or WebSocket message" and do not
-mention RPC. The code currently uses:
+Measured 2026-09-25 against the deployed spike Worker. Command:
+`node scripts/run-spikes.mjs <url> cpu`. Raw result: `docs/spike-results/0.2-cpu.json`.
 
-- **WebSocket messages** for the browser-driven traffic generation on page load (documented to
-  refresh the budget).
-- **Durable Object RPC** from Workflow steps to the Agent for the chunk loops (the unmeasured case).
+The driver's method: call `Burner.burnRpc(iters)` once per request over RPC, doubling `iters` from
+250,000 until a call fails with `exceededCpu`, to find a single-call ceiling. It would then issue
+four calls at 60% of that ceiling back-to-back over RPC, `fetch()`, and WebSocket, to see whether
+each transport gets a fresh budget.
 
-If the measurement shows RPC does not refresh the budget, the Workflow's chunk calls move to
-`fetch()` on the Agent stub. That is a change to the chunk loops in `src/server/workflow.ts` only;
-the core does not change.
+**No single RPC call failed, up to 512,000,000 loop iterations** (the ladder's cap). Because no
+ceiling was found, the second half of the experiment (the fetch/WebSocket comparison) did not run —
+there was no ceiling to compute 60% of. This is a genuine result, not a bug: every rung of the
+ladder, from 250,000 to 512,000,000 iterations, returned `ok: true`.
 
-The spike Worker (`spikes/`) was run locally with `wrangler dev --local` on 2026-09-25 to check the
-plumbing only: RPC, fetch and WebSocket burn calls all complete. Local runs do not enforce the CPU
-limit, so this proves nothing about the budget.
+**This does not confirm the account enforces a 10 ms CPU budget on this call path at all**, which is
+the more important open question than the original one (whether RPC specifically refreshes it). Two
+explanations are both consistent with the data and neither is confirmed:
 
-## 0.4 Structured output reliability (NOT MEASURED)
+1. The account tier is not Workers Free CPU-limited at 10 ms (tier is UNVERIFIED here, see above).
+2. `Burner.burnRpc`'s CPU cost, even at 512M xorshift iterations, executes fast enough under V8's
+   JIT to stay under 10 ms in the Durable Object's own accounting, and DO RPC calls are charged to
+   an isolate whose CPU accounting is separate from the calling Worker's — which would itself answer
+   the original question (RPC gets its own budget) but was not directly observed, only inferred.
+
+**Decision:** keep RPC for the Workflow's chunk loops, per the existing design. No measurement forced
+a change to `fetch()`. But the underlying assumption — that a chunked call this size fits under
+10 ms in production — is not proven by this spike; it rests on the local CPU-per-operation numbers
+in 0.3 instead. If `exceededCpu` appears in Workers logs once the real app runs Workflow steps
+against real traffic chunks, revisit this and switch the transport per the plan already in DESIGN.md
+section 5.
+
+## 0.4 Structured output reliability (MEASURED — fails)
+
+Measured 2026-09-25 against the deployed spike Worker. Command:
+`node scripts/run-spikes.mjs <url> structured 10`. Raw result:
+`docs/spike-results/0.4-structured.json` (all 30 attempts, full raw model output for each).
 
 The driver sends the real production prompt and schema for three scenario shapes, 10 seeds each (30
 attempts), and verifies every output locally with the real pipeline. It records the fractions the
@@ -133,6 +172,45 @@ agent and different wording, and a non-trap where the attack comes only from hos
 
 Temperature is 0, as in production, so the 30 attempts differ by traffic seed and wording rather
 than by sampling.
+
+### Result: 0/30 valid JSON, 0/30 schema-valid, 0/30 type-valid
+
+| Metric | Result |
+| --- | --- |
+| Attempts | 30 (3 shapes x 10 seeds) |
+| Valid JSON | 0/30 |
+| Schema-valid | 0/30 |
+| Type-valid | 0/30 |
+| `JSON Mode couldn't be met` | 0/30 |
+| Other errors | 0/30 |
+| Passes replay thresholds | 0/30 |
+
+Every attempt returns `responseKind: "ok"` — Workers AI does not report a JSON-mode failure — but the
+raw text is not parseable JSON. All 30 fail with the same diagnostic (`E_SCHEMA_NOT_JSON`), the same
+failure shape, and a similar wall time (26.0-35.7 s per call). This is fully reproducible: identical
+across all three scenario shapes and all ten seeds, not a rare or seed-dependent flake.
+
+**Root cause, read from the raw output:** the model gets stuck generating an unboundedly deep,
+degenerate `RuleAST`. Instead of a shallow tree, it emits `{"kind": "or", "left": {"kind": "or",
+"left": {"kind": "or", ...` nested many hundreds of levels deep, never reaching a leaf condition or
+closing the object, until `max_tokens` (1024) cuts it off mid-string. The truncated text is not valid
+JSON, so it never even reaches the JSON Schema validator. Raw output length is consistently
+2,619-2,731 characters of pure nested `"or"` wrapper with no actual conditions.
+
+This is exactly the risk PLAN.md's fallback plan named first: "Nested recursive `RuleAST` unions are
+the most likely failure source." It was correct. **The AST-as-nested-JSON-Schema approach, as
+currently designed and prompted, is not usable with this model at this schema.** This is a measured,
+negative result, recorded rather than hidden per CLAUDE.md's "never report an unmeasured number" and
+the parallel rule against skipping inconvenient findings.
+
+**Not yet done:** implementing and re-measuring against PLAN.md's ordered fallback list (1. flatten
+the schema to a node-list with integer parent references, which is the most likely fix given the
+failure mode measured here; 2. constrain harder with enums; 3. two-call decomposition; 4. few-shot
+examples; 5. constrained template selection). This is real design and prompt-engineering work, not a
+one-line change, and is left as the next Phase 0 step rather than done silently alongside a deploy
+task. Until a fallback is measured to work, Phase 1's model-drafted rule step will fail visibly on
+this account, which is the designed behavior for an unhandled model failure (DESIGN.md section 10),
+just not the intended common case.
 
 ## Measured on the simulator: the trap works
 
@@ -164,5 +242,14 @@ node scripts/run-spikes.mjs https://portcullis-spikes.<sub>.workers.dev model-ra
 Each writes `docs/spike-results/<spike>.json`. Run `model-rate` last: it deliberately drives the
 account into rate limiting, and it spends neurons (tiny prompts, `max_tokens` 16).
 
-Then fill in the three NOT MEASURED sections here and remove the matching UNVERIFIED marks in
-DESIGN.md sections 5 and 13.
+Done 2026-09-25 on this account: subdomain `pragyna-portcullis.workers.dev`, registered via
+`PUT /accounts/:id/workers/subdomain` (the account had none; wrangler's auto-registration failed
+because the default name `portcullis` is taken globally). Deployed URL:
+`https://portcullis-spikes.pragyna-portcullis.workers.dev`. All three spikes ran; results above and
+in `docs/spike-results/`.
+
+Node's built-in `fetch` does not read `HTTPS_PROXY`/`NO_PROXY` by default (unlike `curl`), which
+matters only inside a network-sandboxed dev container like the one these spikes were run from. If
+`node scripts/run-spikes.mjs` fails with a "Host not in allowlist" body instead of JSON, run
+`node --use-env-proxy dist/spikes/driver.mjs <args>` directly after the `esbuild` step instead
+(Node 22's experimental env-proxy support). Not needed against a real network with no egress proxy.
