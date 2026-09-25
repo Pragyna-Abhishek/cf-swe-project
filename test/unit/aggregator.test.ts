@@ -70,8 +70,8 @@ describe("aggregator", () => {
   });
 
   it("signals are shares of the whole", () => {
-    expect(summary.signals.status401Share).toBeGreaterThan(0);
-    expect(summary.signals.status401Share).toBeLessThanOrEqual(summary.signals.errorRate);
+    expect(summary.signals.symptomStatusShare).toBeGreaterThan(0);
+    expect(summary.signals.symptomStatusShare).toBeLessThanOrEqual(summary.signals.errorRate);
     expect(summary.signals.errorRate).toBeLessThanOrEqual(1);
   });
 

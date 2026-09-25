@@ -91,6 +91,13 @@ export type Scenario = {
   requestCount: number;
   /** Scenario length in milliseconds. Offsets fall in [0, durationMs). */
   durationMs: number;
+  /**
+   * The HTTP status that marks "the symptom" for this scenario: 401 for a credential-stuffing
+   * scenario (failed logins), 503 for an l7-flood scenario (origin overload), 404 for a scraper
+   * scenario (enumerating IDs that mostly don't exist). Never the ground truth label; purely a
+   * status code an operator could report without knowing which requests are the attack.
+   */
+  symptomStatus: number;
   /** Pass and fail thresholds for this scenario. See DESIGN.md section 9. */
   thresholds: {
     minAttackBlockedRate: number;
@@ -130,7 +137,7 @@ export type TrafficSummary = {
   totalRequests: number;
   breakdowns: Breakdown[];
   /**
-   * The same breakdowns restricted to the requests that show the symptom (status 401).
+   * The same breakdowns restricted to the requests that show the symptom (the scenario's symptomStatus).
    * Computed from status alone, never from the ground truth label.
    */
   symptomSlice: {
@@ -141,7 +148,8 @@ export type TrafficSummary = {
   /** Aggregate signals the symptom classifier uses. */
   signals: {
     errorRate: number;
-    status401Share: number;
+    /** Share of all requests returning the scenario's symptomStatus. */
+    symptomStatusShare: number;
     status429Share: number;
   };
 };

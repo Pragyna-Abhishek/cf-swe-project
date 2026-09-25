@@ -233,7 +233,7 @@ export class IncidentAgent extends Agent<Env, AgentState> {
     const traffic = generateRange(def, seed, plan.start, plan.count);
     const blob = encodeTraffic(traffic);
     const digest = chunkDigest(blob);
-    const partial = aggregateChunk(traffic, def.scenario.durationMs);
+    const partial = aggregateChunk(traffic, def.scenario.durationMs, def.scenario.symptomStatus);
     store.insertChunk(this.db, {
       scenarioId,
       seed,
