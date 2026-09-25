@@ -4,11 +4,11 @@ This document explains what Portcullis is, why it is built the way it is, and ho
 once it exists. It starts from zero background and ends at the level of detail in `DESIGN.md`. You
 do not need to know anything about Cloudflare, web security, or TypeScript before you start.
 
-**Important, read this first: as of today, Portcullis is a design, not a running program.** The
-repository holds three planning documents (`DESIGN.md`, `PLAN.md`, `CLAUDE.md`) and no application
-code. Every description of "what the system does" in this document describes what the design says
-it will do once it is built. Sections describing unbuilt behavior are marked **(planned)**. Part 9
-gives the honest, current status.
+**Important, read this first: Phases 0 to 2 of `PLAN.md` are now built.** The whole loop in this
+document (traffic, investigation, rule drafting, verification, replay, approval, apply, recovery)
+runs locally with a fake model standing in for the real one, and is covered by tests. It has not
+been deployed, and the real model has not yet been measured. Each part below says whether it
+describes something **(built)** or **(planned)**. Part 9 gives the exact status.
 
 ## Table of contents
 
@@ -100,7 +100,7 @@ rule against real numbers, and ultimately to a person.
 
 ## 2. A day in the life
 
-**(planned)** This section walks through one complete use of Portcullis from start to finish, in
+**(built, except the hypothesis and report beats, which are Phase 4)** This section walks through one complete use of Portcullis from start to finish, in
 plain language, the way an operator would actually experience it. It corresponds to the 60-second
 demo script in `DESIGN.md` section 3, slowed down and explained.
 
@@ -169,7 +169,7 @@ sequenceDiagram
 
 ## 3. The moving parts
 
-**(planned)** This part introduces the building blocks Portcullis is made of. Each one gets a plain
+**(built)** This part introduces the building blocks Portcullis is made of. Each one gets a plain
 analogy before its technical name, because the technical names come from Cloudflare's platform and
 won't mean anything on their own yet.
 
@@ -246,7 +246,7 @@ flowchart TB
 
 ## 4. What flows through the system
 
-**(planned)** Before looking at real code, it helps to know what pieces of information exist and
+**(built; the real code is `src/core/types.ts`)** Before looking at real code, it helps to know what pieces of information exist and
 what each one is for. Here they are, in plain English first:
 
 | Name | What it is, in one sentence |
@@ -349,7 +349,7 @@ are not repeated here in full, since this section's job is to build the vocabula
 
 ## 5. The heart of the project: the rules language
 
-**(planned)** This is the part of Portcullis its own design document insists must be understood
+**(built, in `src/core/rules/`)** This is the part of Portcullis its own design document insists must be understood
 "line by line," so it gets the most careful walkthrough.
 
 ### What a rule actually is
@@ -374,8 +374,8 @@ http.request.uri.path eq "/login" and ip.src.asnum eq 12345
 (Extended Backus-Naur Form). If you've never seen EBNF, here's how to read it: each line defines a
 named piece by saying what smaller pieces it's built from. `{ x }` means "zero or more of `x`."
 `[ x ]` means "`x` is optional." `"text"` in quotes means that exact literal text has to appear.
-A vertical bar `|` means "either this or that." Reading top to bottom, here's the (draft) grammar,
-simplified from `DESIGN.md` section 7:
+A vertical bar `|` means "either this or that." Reading top to bottom, here's the grammar as it was
+first drafted, simplified from `DESIGN.md` section 7:
 
 ```ebnf
 expression   = or_expr ;
@@ -396,6 +396,12 @@ front of a `primary`, and a `primary` is either a parenthesized expression or an
 like `field eq value`. This nesting is exactly what makes `not` bind tighter than `and`, which binds
 tighter than `or`, the same order of operations idea as arithmetic, just for logic instead of
 numbers.
+
+The built version makes one structural change: which literal type goes with which field moved out
+of the grammar and into a separate type checker. The parser accepts `ip.src.asnum eq "64500"` as
+well-formed, and the type checker then rejects it with a message that points at the offending
+literal, which is far more useful than "unexpected token". `DESIGN.md` section 7 has the final
+grammar and every change from the draft, each with its reason.
 
 `DESIGN.md` sizes this grammar down deliberately from Cloudflare's real production Rules language:
 only six fields, no regex, no numeric ordering comparisons, nothing that would make the parser and
@@ -474,7 +480,7 @@ their place.
 
 ## 6. Orchestration: the workflow
 
-**(planned)** An investigation isn't one single action; it's a sequence of steps, some of which
+**(built for one draft attempt; the retry loop is Phase 3)** An investigation isn't one single action; it's a sequence of steps, some of which
 might need to wait: for a slow model response, or for a human to get around to clicking a button,
 possibly days later. That waiting is the reason this whole part of Portcullis is built around a
 **Workflow** rather than an ordinary function call.
@@ -544,7 +550,7 @@ A few things worth calling out about this sequence:
 
 ## 7. Why it's built this way
 
-**(planned)** Two decisions in `DESIGN.md` are worth walking through in detail, because they're the
+**(built)** Two decisions in `DESIGN.md` are worth walking through in detail, because they're the
 kind of real engineering tradeoffs this project's write-up should actually explain, not just state.
 
 ### Story one: the 10-millisecond budget
@@ -628,7 +634,7 @@ being a real safeguard and it being a decoration.
 
 ## 8. Security, honestly
 
-**(planned)** `DESIGN.md` deliberately doesn't dress this section up, and neither does this one.
+**(built)** `DESIGN.md` deliberately doesn't dress this section up, and neither does this one.
 
 ### Prompt injection, with a concrete example
 
@@ -671,46 +677,42 @@ authentication would be one of the very first things to change.
 This section is deliberately the most boring one in the document, because it's the one place where
 precision matters more than narrative.
 
-**As of right now, the repository contains:**
-
-| File | What it is |
-| --- | --- |
-| `DESIGN.md` | The architecture, data model, grammar, workflow, and security design. Source of truth. |
-| `PLAN.md` | The eight build phases, each with concrete acceptance criteria. |
-| `CLAUDE.md` | Standing rules for whoever builds this next (human or AI), including the invariants from Part 7. |
-| `EXPLAINER.md` | This document. |
-| `README.md` | Still the original placeholder. Has not yet been updated with run instructions or a demo link. |
-
-**That's the entire repository.** There is no `src/` directory, no test files, no `package.json`, no
-deployable code of any kind yet.
-
-`PLAN.md` lays out the work as eight phases. None of them have been started:
-
 | Phase | What it delivers | Status |
 | --- | --- | --- |
-| 0 | Spikes and measurements: is the model usable, does the CPU budget behave as expected, how much traffic fits in 10 ms | Not started |
-| 1 | A thin end-to-end slice, actually deployed: one scenario, a minimal rule grammar, the full approve/apply loop working | Not started |
-| 2 | The real, full parser and evaluator, thoroughly tested | Not started |
+| 0 | Spikes and measurements: is the model usable, does the CPU budget behave as expected, how much traffic fits in 10 ms | Partly done. The CPU sizing is measured (on the development machine, not on Cloudflare). The other three need a Cloudflare account; the tools to measure them are built |
+| 1 | A thin end-to-end slice: one scenario, the full approve and apply loop | Built and tested locally with the fake model. Not deployed yet |
+| 2 | The real, full parser and evaluator, thoroughly tested | Built and tested |
 | 3 | The bounded retry loop, with diagnostics fed back to the model | Not started |
 | 4 | More scenarios, a full evidence ledger, memory of past incidents | Not started |
 | 5 | An evaluation harness with ablation experiments | Not started |
 | 6 | Failure-injection tests and tracing | Not started |
 | 7 | UI polish, a real README, the prompt-history documentation | Not started |
 
-Phase 0 is explicitly the gate: `PLAN.md`'s own sequencing notes say nothing architectural should be
-treated as settled until Phase 0's four measurements come back, and no later phase should start
-before it. So the honest one-line summary is: **the design is finished and has been read against
-current Cloudflare documentation; construction has not begun.**
+Phase 1 was planned to use a deliberately tiny grammar first, with the full grammar in Phase 2.
+Since both were built together, the full grammar went in directly.
 
-### A map for later
+What has actually been measured, in `docs/spikes.md`:
 
-Once code exists, here's roughly where to expect to find it, based on the architecture in Part 3 and
-the phases above: the deterministic core (simulator, parser, type checker, evaluator) will be plain
-TypeScript with no Cloudflare-specific imports, kept deliberately separate so it can be tested at
-full speed without any cloud dependency; the `IncidentAgent`, `InvestigationWorkflow`, and the Worker
-entrypoint will be the thin Cloudflare-specific layer wrapping that core; and a `prompts/` directory
-will hold every prompt template used to talk to the model, checked into version control rather than
-buried as string literals in code, per `CLAUDE.md`'s repository conventions.
+- On the simulator's trap scenario, the naive rule (block the shared network) blocks 62.3% of the
+  attack and **46.3% of real customers' requests**. A precise rule that checks the login path and
+  the attack's user agents blocks 100% of the attack and none of the real traffic. That precise
+  rule was written by hand for the fake model; whether the real model finds something as good is
+  the main unmeasured question.
+- Generating the whole scenario in one call would take about 9 to 11 ms of CPU on a cold start, over
+  the 10 ms budget, so it is split into chunks of 500 requests, each well under budget.
+
+### A map of the code
+
+| Path | What it is |
+| --- | --- |
+| `src/core/` | The deterministic core, plain TypeScript with no Cloudflare imports: simulator (`simulator.ts`), binary encoding (`codec.ts`), label-blind aggregation (`aggregator.ts`), the naive baseline (`baseline.ts`), replay numbers (`replay.ts`), prompt assembly (`prompt.ts`) |
+| `src/core/rules/` | The rules language: `lexer.ts`, `parser.ts`, `printer.ts`, `typecheck.ts`, `limits.ts`, `schema.ts` (the model output boundary), `evaluate.ts` (the fast evaluator), `reference.ts` (the slow one it is checked against), `pipeline.ts` (ties them together), `diagnostics.ts` (every error code) |
+| `src/model/` | The single interface every model call goes through, the Workers AI version, and the fake |
+| `src/server/` | The Cloudflare layer: `index.ts` (Worker entry), `agent.ts` (`IncidentAgent`), `workflow.ts` (`InvestigationWorkflow`), `store.ts` (SQLite) |
+| `ui/` | The React page |
+| `prompts/` | The prompt templates, as plain text files |
+| `test/unit/`, `test/integration/` | 159 fast tests of the core, and 14 tests of the real Agent and Workflow running in Cloudflare's local runtime |
+| `spikes/`, `scripts/` | Tools for the measurements that need a Cloudflare account |
 
 ---
 
