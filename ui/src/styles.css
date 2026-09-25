@@ -1,0 +1,371 @@
+:root {
+  --bg: #f6f7f9;
+  --card: #ffffff;
+  --text: #1c2330;
+  --muted: #8a93a3;
+  --line: #e2e6ec;
+  --ok: #7aa7d9;
+  --bad: #d9534f;
+  --warn: #e0a030;
+  --good: #2e8b57;
+  --accent: #2b4f81;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  color: var(--text);
+  background: var(--bg);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #12161d;
+    --card: #1b212b;
+    --text: #e4e8ee;
+    --muted: #8691a3;
+    --line: #2c3442;
+    --ok: #4f7fb3;
+    --accent: #8fb4e8;
+  }
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+}
+
+main {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+header h1 {
+  margin: 0;
+  font-size: 1.6rem;
+}
+
+.tagline {
+  margin: 2px 0 8px;
+  color: var(--muted);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 16px;
+  margin: 16px 0;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 16px;
+  min-width: 0;
+}
+
+h2 {
+  margin-top: 0;
+  font-size: 1.1rem;
+}
+
+h3 {
+  font-size: 0.95rem;
+  margin: 0 0 8px;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.pill {
+  margin-left: 8px;
+  font-size: 0.75rem;
+  border: 1px solid var(--warn);
+  color: var(--warn);
+  border-radius: 999px;
+  padding: 1px 8px;
+}
+
+.traffic svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.traffic figcaption {
+  font-size: 0.85rem;
+  margin-bottom: 4px;
+}
+
+.traffic {
+  margin: 0 0 12px;
+}
+
+.axis {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 0.8rem;
+}
+
+.legend i {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-right: 4px;
+  border-radius: 2px;
+}
+
+textarea,
+input {
+  width: 100%;
+  box-sizing: border-box;
+  font: inherit;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text);
+}
+
+button {
+  font: inherit;
+  padding: 6px 14px;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--text);
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+form button {
+  margin-top: 8px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+}
+
+.history {
+  list-style: none;
+  padding: 0;
+  margin: 16px 0 0;
+}
+
+.history button {
+  width: 100%;
+  text-align: left;
+  border: none;
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
+  background: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.history button.selected {
+  background: var(--bg);
+}
+
+.status {
+  font-size: 0.75rem;
+  padding: 1px 6px;
+  border-radius: 4px;
+  border: 1px solid currentColor;
+}
+
+.status-applied,
+.status-valid {
+  color: var(--good);
+}
+
+.status-awaiting-approval,
+.status-investigating {
+  color: var(--accent);
+}
+
+.status-failed,
+.status-rejected,
+.status-timed-out,
+.status-invalid-schema,
+.status-invalid-types,
+.status-roundtrip-failed {
+  color: var(--bad);
+}
+
+.steps {
+  list-style: none;
+  padding: 0;
+  font-size: 0.85rem;
+}
+
+.step {
+  display: grid;
+  grid-template-columns: 200px 80px 1fr;
+  gap: 8px;
+  padding: 3px 0;
+  border-bottom: 1px dashed var(--line);
+}
+
+.step-running .step-status,
+.step-waiting .step-status {
+  color: var(--accent);
+}
+
+.step-error .step-status {
+  color: var(--bad);
+}
+
+.step-complete .step-status {
+  color: var(--good);
+}
+
+.step-detail {
+  overflow-wrap: anywhere;
+}
+
+.rules {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 16px;
+  margin: 16px 0;
+}
+
+.rule {
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 12px;
+  min-width: 0;
+}
+
+pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  background: var(--bg);
+  padding: 8px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+}
+
+.counts {
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.counts th {
+  text-align: left;
+  padding-right: 12px;
+  font-weight: 500;
+}
+
+.counts td {
+  padding-right: 12px;
+}
+
+.pass {
+  color: var(--good);
+  font-size: 0.85rem;
+}
+
+.fail {
+  color: var(--bad);
+  font-size: 0.85rem;
+}
+
+.decision {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.decision input {
+  flex: 1;
+  min-width: 180px;
+  width: auto;
+}
+
+.approve {
+  background: var(--good);
+  color: #fff;
+  border: none;
+}
+
+.reject {
+  border-color: var(--bad);
+  color: var(--bad);
+}
+
+.error {
+  color: var(--bad);
+}
+
+.diagnostics {
+  font-size: 0.85rem;
+  padding-left: 16px;
+}
+
+.diagnostics .warning code {
+  color: var(--warn);
+}
+
+.diagnostics .error code {
+  color: var(--bad);
+}
+
+mark {
+  background: var(--warn);
+  color: #000;
+}
+
+.evidence summary {
+  cursor: pointer;
+  margin-top: 12px;
+}
+
+.breakdowns {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.breakdown table {
+  font-size: 0.8rem;
+  width: 100%;
+}
+
+.breakdown .key {
+  overflow-wrap: anywhere;
+  max-width: 180px;
+}
+
+.breakdown h4 {
+  margin: 0 0 4px;
+  font-size: 0.85rem;
+}
+
+.loading {
+  padding: 40px;
+  color: var(--muted);
+}
+
+@media (max-width: 600px) {
+  .step {
+    grid-template-columns: 1fr auto;
+  }
+  .step-detail {
+    grid-column: 1 / -1;
+  }
+}

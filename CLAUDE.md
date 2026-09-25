@@ -108,6 +108,13 @@ Rules:
 - The columnar evaluator is validated against a naive reference evaluator over decoded `Request`
   objects. That property test is the correctness argument for the optimization; keep it passing.
 - Re-measure CPU after any change to the evaluator or simulator. Do not assume the budget still fits.
+  `npm run bench` (warm) and `node scripts/bench-cold.mjs` (cold, the honest bound).
+- The AI binding is remote-only. Integration tests set `remoteBindings: false` and `MODEL_MODE=fake`,
+  so they need no credentials. Keep it that way.
+- Assert on a thrown Durable Object RPC error with `errorOf()` from `test/integration/helpers.ts`,
+  not `expect(rpc).rejects`, which leaves a stray unhandled rejection.
+- `DESIGN.md` section 6 is a verbatim copy of `src/core/types.ts`, enforced by
+  `test/unit/design-sync.test.ts`. Change both together.
 
 ## Model access
 
@@ -128,6 +135,11 @@ AI) and one fake.
 - `docs/spikes.md` holds every measurement with its date and the account tier. Cite it rather than
   restating numbers from memory.
 - Commit messages say what changed and why. If a dependency was added, say why there.
+- `.npmrc` sets `legacy-peer-deps=true` because npm 10.9 crashes resolving optional peer dependencies (first seen installing vitest 4.1.11)
+  (`Cannot read properties of null (reading 'edgesOut')`). The side effect is that npm no longer
+  installs required peers either, so `agents`' four required peers are pinned in `package.json`
+  explicitly. If you add a package with required peers, pin them too.
+- Local development without credentials: `npm run build && npx wrangler dev --local --var MODEL_MODE:fake`.
 
 ## Writing style for all documents in this repository
 

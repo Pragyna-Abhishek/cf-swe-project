@@ -1,0 +1,11 @@
+{
+  "extends": "agents/tsconfig",
+  "compilerOptions": {
+    "types": ["node", "@cloudflare/workers-types", "vite/client", "@cloudflare/vitest-plugin/types"],
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitOverride": true
+  },
+  "include": ["worker-configuration.d.ts", "src", "ui/src", "test", "scripts", "spikes/src", "*.config.ts", "env.d.ts"]
+}

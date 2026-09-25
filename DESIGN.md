@@ -71,8 +71,11 @@ build has a target.
 | 0:42 to 0:50 | Reviewer clicks Approve. Rule applies. Traffic recovers on the live panel. |
 | 0:50 to 1:00 | Report and lesson persist. Reviewer reloads the page; incident history is still there, because state is in the Durable Object, not the browser. |
 
-The percentages above are placeholders. They are UNVERIFIED until Phase 1 measures them, and the
-README will carry measured numbers or none.
+The percentages above were placeholders written before implementation. Measured since, on the
+simulator for the committed scenario and seed (docs/spikes.md): the naive rule blocks 62.3% of
+attack and **46.3% of legitimate** traffic. A precise hand-written rule blocks 100% and 0%. What the
+real model's rule achieves is UNVERIFIED until spike 0.4 runs on the account. The demo with the fake
+model runs end to end locally today; the "hypothesis" and "report and lesson" beats are Phase 4.
 
 ## 4. Architecture
 
@@ -177,24 +180,36 @@ Two reasons:
   objects. That is the difference between fitting in 10 ms and not.
 - Decoding one blob is far cheaper than materializing thousands of row objects out of SQLite.
 
-Sizing: Durable Object SQLite caps a string, BLOB or row at 2 MB. At roughly 40 packed bytes per
-request, 5,000 requests is about 200 KB, comfortably inside a single row. Scenario size will be set
-from the Phase 0 measurement, not from this estimate.
+Sizing: Durable Object SQLite caps a string, BLOB or row at 2 MB. The encoding
+(`src/core/codec.ts`) is 18 bytes per request plus a 20 byte header, so a 500 request chunk is
+9,020 bytes, one row per chunk.
+
+Measured (docs/spikes.md, 0.3): generating 6,000 requests in one call takes 9.2 ms median and
+11.3 ms worst on a cold isolate, so it does not fit. Chunks of 500 take at most about 5.5 ms cold
+for generate, encode and aggregate together. **`CHUNK_SIZE = 500` and `requestCount = 6000`**
+(12 chunks). Measured in Node on the development container, not on Cloudflare hardware; the margin
+is deliberate.
 
 ### Decision B: generate once, chunk across calls, steps carry only summaries
 
 - Traffic is generated **once** per `(scenarioId, seed)` inside the Agent and persisted. No later
-  step regenerates it.
+  step regenerates it. Each chunk is aggregated at the moment it is generated and its partial
+  aggregate is stored beside it, so summarizing later is a cheap merge of 12 small count arrays
+  rather than a second pass over the traffic.
 - Work too large for one 10 ms slice is **chunked across separate calls into the Agent**, because
   each incoming request refreshes the CPU budget.
 - Workflow steps call the Agent and receive only aggregates and counts, never rows. This also
   satisfies the 1 MiB step-return and 1 MiB event-payload limits without special effort.
 
-UNVERIFIED, and Phase 0 must measure it: this relies on a **Durable Object RPC call counting as an
-incoming request that refreshes the CPU budget**. The docs say the budget is refreshed by "each
-incoming HTTP request or WebSocket message" and do not state whether a plain RPC method call
-qualifies. If it does not, chunking moves to `fetch()` or WebSocket messages instead. The code keeps
-the chunk driver behind one interface so this can change without touching the core.
+Two chunk drivers exist. On page load the browser calls `generateTrafficChunk` once per chunk over
+the WebSocket; the docs say each WebSocket message refreshes the budget. Inside the investigation,
+Workflow steps loop over chunks calling the Agent over Durable Object RPC.
+
+UNVERIFIED, and Phase 0 spike 0.2 must measure it on the account: the second driver relies on a
+**Durable Object RPC call counting as an incoming request that refreshes the CPU budget**. The docs
+say the budget is refreshed by "each incoming HTTP request or WebSocket message" and do not state
+whether a plain RPC method call qualifies. If it does not, the Workflow's chunk loops switch to
+`fetch()` on the Agent stub. The spike Worker in `spikes/` measures exactly this.
 
 Fallback if generation cannot be made to fit even when chunked: precompute scenarios at build time.
 The simulator is a pure seeded function, so build-time generation is equivalent by construction,
@@ -206,17 +221,40 @@ and a test asserts the runtime simulator produces a byte-identical digest.
 | --- | --- | --- |
 | CPU per request | 10 ms | Drives sections A and B above |
 | Requests per day | 100,000 | Fine for a demo; the eval harness runs against the fake model |
-| Subrequests per request | 50 | The workflow makes about 4 model calls plus a handful of RPCs |
+| Subrequests per request | 50 | A heavy step makes 12 chunk calls plus a couple of others. Whether Durable Object RPC counts as a subrequest is UNVERIFIED; 12 is inside the limit either way |
 | Steps per Workflow | 1,024 | Chunked work must stay well inside this |
 | Concurrent Workflow instances | 100 | `waiting` instances do not count, so parked approvals are free |
 | Durable Objects storage | 5 GB | Not a constraint at this scale |
 
 ## 6. Data model
 
+The block below is copied verbatim from `src/core/types.ts`, and `test/unit/design-sync.test.ts`
+fails if the two drift apart.
+
+Additions made during implementation, each for a stated reason:
+
+- `ColumnarTraffic.start`: a chunk has to know where it sits in the scenario.
+- `Scenario.durationMs`: time buckets and attack windows need the scenario length.
+- `TrafficSummary.symptomSlice`: the same breakdowns restricted to HTTP 401 responses. Selected by
+  status, never by label, so the model still never sees ground truth (invariant 4). Without it the
+  model cannot tell which attributes go with the symptom.
+- `lower` on the `in` node: the grammar already allowed `lower(field) in {...}`, but the draft AST
+  could not represent it.
+- `Span`, and spans as JavaScript string offsets (UTF-16 code units) rather than bytes: the only
+  consumer is the UI, which highlights by string index.
+- `ReplayCounts` and `ReplayResult.passesThresholds`: the four counts as their own type, and the
+  threshold verdict computed in code next to the rates.
+- `RuleVersion.source`: the naive baseline is stored as a rule version too, marked as generated in
+  code, so it goes through the same printer, parser and replay.
+- `Incident.baselineRuleVersionId`, `recovery`, `failureReason`: what the UI shows beside the
+  proposal, the post-apply measurement, and why a failed incident failed.
+
 ```ts
 // ---------------------------------------------------------------------------
 // Traffic
 // ---------------------------------------------------------------------------
+
+export type HttpMethod = "GET" | "POST" | "PUT" | "DELETE" | "HEAD";
 
 /**
  * One simulated HTTP request, decoded. This is the human-facing and test-facing
@@ -227,7 +265,7 @@ export type Request = {
   index: number;
   /** Milliseconds since scenario start. */
   offsetMs: number;
-  method: "GET" | "POST" | "PUT" | "DELETE" | "HEAD";
+  method: HttpMethod;
   path: string;
   /** ISO 3166-1 alpha-2, or "XX" when unknown. */
   country: string;
@@ -251,10 +289,15 @@ export type TrafficDictionary = {
 /**
  * Storage and evaluation shape. Parallel arrays, one entry per request.
  * All string columns hold indices into the matching TrafficDictionary array.
+ *
+ * A ColumnarTraffic value may hold a whole scenario or one chunk of it. `start` is the
+ * scenario index of element 0, so a chunk knows where it sits.
  */
 export type ColumnarTraffic = {
   scenarioId: string;
   seed: number;
+  /** Scenario index of the first request in this value. 0 for a whole scenario. */
+  start: number;
   /** Number of requests. Every typed array below has this length. */
   count: number;
   dictionary: TrafficDictionary;
@@ -276,6 +319,8 @@ export type ColumnarTraffic = {
 
 export type ScenarioFamily = "credential-stuffing" | "scraper" | "l7-flood";
 
+export type TrapAttribute = "asn" | "path" | "country" | "userAgent";
+
 export type Scenario = {
   id: string;
   title: string;
@@ -288,10 +333,12 @@ export type Scenario = {
    */
   isTrap: boolean;
   /** Which attribute is shared. Null when isTrap is false. */
-  trapAttribute: "asn" | "path" | "country" | "userAgent" | null;
+  trapAttribute: TrapAttribute | null;
   seed: number;
   requestCount: number;
-  /** Pass and fail thresholds for this scenario. See section 9. */
+  /** Scenario length in milliseconds. Offsets fall in [0, durationMs). */
+  durationMs: number;
+  /** Pass and fail thresholds for this scenario. See DESIGN.md section 9. */
   thresholds: {
     minAttackBlockedRate: number;
     maxLegitimateBlockedRate: number;
@@ -311,10 +358,12 @@ export type BreakdownDimension =
   | "status"
   | "timeBucket";
 
+export type BreakdownRow = { key: string; count: number; share: number };
+
 export type Breakdown = {
   dimension: BreakdownDimension;
   /** Descending by count, truncated to a fixed row cap. */
-  rows: Array<{ key: string; count: number; share: number }>;
+  rows: BreakdownRow[];
   /** Requests not represented in `rows` after truncation. */
   otherCount: number;
   /** The Evidence record this breakdown is addressable by. */
@@ -327,6 +376,15 @@ export type TrafficSummary = {
   window: { fromMs: number; toMs: number };
   totalRequests: number;
   breakdowns: Breakdown[];
+  /**
+   * The same breakdowns restricted to the requests that show the symptom (status 401).
+   * Computed from status alone, never from the ground truth label.
+   */
+  symptomSlice: {
+    description: string;
+    totalRequests: number;
+    breakdowns: Breakdown[];
+  };
   /** Aggregate signals the symptom classifier uses. */
   signals: {
     errorRate: number;
@@ -362,7 +420,7 @@ export type RuleAST =
       lower?: boolean;
     }
   | { kind: "contains"; field: StringField; value: string; lower?: boolean }
-  | { kind: "in"; field: RuleField; values: Array<string | number> };
+  | { kind: "in"; field: RuleField; values: Array<string | number>; lower?: boolean };
 
 // ---------------------------------------------------------------------------
 // Evidence, rule versions, incidents
@@ -382,25 +440,34 @@ export type Evidence = {
   createdAt: number;
 };
 
+/** Offsets into the rule text, as JavaScript string indices (UTF-16 code units). */
+export type Span = { start: number; end: number };
+
 export type Diagnostic = {
   severity: "error" | "warning";
-  /** Stable machine code, for example "E_UNKNOWN_FIELD". */
+  /** Stable machine code, for example "E_UNKNOWN_FIELD". See src/core/rules/diagnostics.ts. */
   code: string;
   message: string;
-  /** Byte offsets into the rendered rule text, when known. */
-  span: { start: number; end: number } | null;
+  /** Where in the rule text the problem is, when known. */
+  span: Span | null;
 };
 
-export type ReplayResult = {
+/** The four counts every replay produces. Everything else is derived from these. */
+export type ReplayCounts = {
   attackTotal: number;
   attackBlocked: number;
   legitimateTotal: number;
   legitimateBlocked: number;
+};
+
+export type ReplayResult = ReplayCounts & {
   /** Derived in code from the four counts above. */
   attackBlockedRate: number;
   legitimateBlockedRate: number;
-  /** Deterministic. Formula in section 9. Never model produced. */
+  /** Deterministic. Formula in DESIGN.md section 9. Never model produced. */
   safetyScore: number;
+  /** True when the rates clear the scenario's thresholds. */
+  passesThresholds: boolean;
   evidenceId: string;
 };
 
@@ -412,9 +479,13 @@ export type RuleVersionStatus =
   | "applied"
   | "rejected";
 
+/** Where a rule version came from. The baseline is generated in code, never by the model. */
+export type RuleVersionSource = "model" | "naive-baseline";
+
 export type RuleVersion = {
   id: string;
   incidentId: string;
+  source: RuleVersionSource;
   /** 1-based. Bounded by MAX_DRAFT_ATTEMPTS. */
   attempt: number;
   /** Exactly what the model returned, pre-validation. Kept for audit. */
@@ -449,6 +520,8 @@ export type Incident = {
   hypothesis: string | null;
   /** The rule version the operator was shown and asked to approve. */
   proposedRuleVersionId: string | null;
+  /** The naive single attribute rule, generated in code, shown beside the proposal. */
+  baselineRuleVersionId: string | null;
   /** Set only by the apply step, only after approval. */
   appliedRuleVersionId: string | null;
   approval: {
@@ -456,6 +529,10 @@ export type Incident = {
     decision: "approved" | "rejected";
     reason: string | null;
   } | null;
+  /** Replay of the applied rule against the same traffic, computed after apply. */
+  recovery: ReplayResult | null;
+  /** Why the incident failed, when status is "failed". Written by code, not the model. */
+  failureReason: string | null;
   evidenceIds: string[];
   report: string | null;
   /** One sentence, retrieved by later investigations in the same family. */
@@ -465,44 +542,77 @@ export type Incident = {
 };
 ```
 
-## 7. Rules language subset: DRAFT grammar
+## 7. Rules language subset
 
-**This is a draft for Abhishek to finalize.** The parser and evaluator are the core of the project
-and the grammar is his to own. What follows is a starting point sized to be defensible line by line.
+**Implemented in Phase 2, pending Abhishek's review.** The grammar is his to own. The draft below
+was implemented as written except for the changes listed after it, each of which the draft forced
+by being ambiguous or unimplementable as stated. Nothing was added that the draft did not have.
+
+The grammar is split in two: a syntactic grammar the parser implements, and typing rules the type
+checker implements. The draft folded types into the grammar (`string_cmp`, `number_cmp`), which
+would make `ip.src.asnum eq "64500"` a bare "unexpected token" error. Split, the same input gets
+`E_TYPE_MISMATCH` pointing at the literal, which is what the retry loop needs to feed back.
+
+### Syntax (src/core/rules/parser.ts, src/core/rules/lexer.ts)
 
 ```ebnf
-(* DRAFT. Not final. *)
-
 expression   = or_expr ;
 or_expr      = and_expr { "or" and_expr } ;
 and_expr     = not_expr { "and" not_expr } ;
 not_expr     = [ "not" ] primary ;
 primary      = "(" expression ")" | comparison ;
-
-comparison   = string_cmp | number_cmp ;
-
-string_cmp   = string_term ( "eq" | "ne" | "contains" ) string_lit
-             | string_term "in" string_set ;
-number_cmp   = number_field ( "eq" | "ne" ) number_lit
-             | number_field "in" number_set ;
-
-string_term  = string_field | "lower" "(" string_field ")" ;
-
-string_set   = "{" string_lit { string_lit } "}" ;
-number_set   = "{" number_lit { number_lit } "}" ;
-
-string_field = "http.request.method"
-             | "http.request.uri.path"
-             | "http.user_agent"
-             | "ip.src.country" ;
-number_field = "http.response.code"
-             | "ip.src.asnum" ;
-
-string_lit   = '"' { char } '"' ;
-number_lit   = digit { digit } ;
+comparison   = term ( "eq" | "ne" | "contains" ) literal
+             | term "in" "{" literal { literal } "}" ;
+term         = field | "lower" "(" field ")" ;
+field        = "http.request.method" | "http.request.uri.path" | "http.user_agent"
+             | "ip.src.country" | "http.response.code" | "ip.src.asnum" ;
+literal      = string_lit | number_lit ;
+string_lit   = '"' { char | '\\"' | '\\\\' } '"' ;   (* only two escapes; no control characters *)
+number_lit   = "0" | nonzero_digit { digit } ;        (* no leading zeros; at most 4294967295 *)
 ```
 
-Precedence, tightest first: `lower()` application, `not`, `and`, `or`. Parentheses override.
+Two type errors cannot be represented in `RuleAST` at all (`contains` on a number field, and
+`contains` with a number literal), so the parser reports those two itself. An empty set `{}`
+parses and is rejected by the type checker, for the same reason as above: a better message.
+
+### Typing rules (src/core/rules/typecheck.ts)
+
+| Rule | Code |
+| --- | --- |
+| String fields take string literals; number fields take integer literals | `E_TYPE_MISMATCH` |
+| `contains` only on string fields | `E_CONTAINS_ON_NUMBER` |
+| `lower()` only on string fields | `E_LOWER_ON_NUMBER` |
+| A set is non-empty | `E_EMPTY_SET` |
+| A set has one literal type | `E_SET_NOT_HOMOGENEOUS` |
+| `http.response.code` is 100 to 599, `ip.src.asnum` is 0 to 4294967295 | `E_NUMBER_OUT_OF_RANGE` |
+| Warning: `lower(x)` compared with a literal containing uppercase never matches | `W_LOWER_UPPERCASE_LITERAL` |
+| Warning: `contains ""` matches every request | `W_EMPTY_CONTAINS` |
+| Warning: a set repeats a value | `W_DUPLICATE_SET_VALUE` |
+
+Warnings do not fail a rule. The full list of diagnostic codes, with messages, is
+`src/core/rules/diagnostics.ts`; every code is produced by at least one test.
+
+### Limits (src/core/rules/fields.ts)
+
+Checked before printing and before evaluation, so a pathological rule cannot burn the CPU budget:
+depth 32, 64 nodes, 32 values per set, 256 characters per string literal, 8,192 characters of rule
+text. Depth is 32 rather than something smaller because `and` and `or` fold to the left, so a flat
+chain of n conditions is n deep.
+
+### Changes from the draft, and why
+
+| Change | Why |
+| --- | --- |
+| Types moved from the grammar to the type checker | Precise diagnostics, as above |
+| `lower(field) in {...}` is representable (`lower` on the `in` node) | The draft grammar allowed it but the draft AST could not hold it |
+| String escapes defined: `\"` and `\\` only | The draft left `char` undefined. Two escapes are enough to print any string, and the printer and lexer must agree exactly |
+| Number literals: no leading zeros, at most 4294967295 | One spelling per number, so rule text and AST correspond one to one. The cap is the largest ASN |
+| `not not x` is a syntax error; write `not (not x)` | The draft's `not_expr = [ "not" ] primary` already said this. Kept, and the printer parenthesizes |
+
+### Precedence
+
+Tightest first: `lower()` application, `not`, `and`, `or`. Parentheses override. Pinned by tests:
+`a or b and c` is `a or (b and c)`, and `not a and b` is `(not a) and b`.
 Confirmed from the Rules language operators page: "The `not` operator ranks first in order of
 precedence."
 
@@ -530,8 +640,8 @@ Read from the Cloudflare docs in this session:
 | No `xor` / `^^` | Real Rules language has it in the precedence table. Omitted as unused. |
 | No IP data type, no CIDR | `ip.src.asnum` gives the ASN grouping the scenarios need without an IP parser. |
 
-`lower()` is the one item in this grammar that is not load-bearing. If Phase 2 runs short, cut it
-first.
+`lower()` stayed. It is load-bearing in the trap scenario: the attack sends `okhttp/4.9.3`,
+`OkHttp/4.9.3` and `OKHTTP/4.9.3`, and legitimate traffic sends none of them.
 
 ### Round-trip property
 
@@ -541,8 +651,27 @@ The model emits an AST, never text. So the pipeline is:
 model -> RuleAST (JSON Schema validated) -> printer -> rule text -> parser -> RuleAST'
 ```
 
-and the invariant is `RuleAST' deep-equals RuleAST`. This is asserted on every draft and is also a
-property test over generated ASTs.
+and the invariant is `RuleAST' deep-equals RuleAST`. This is asserted on every draft
+(`src/core/rules/pipeline.ts`) and is a property test over 1,000 generated ASTs, including
+type-incorrect ones and awkward strings (`test/unit/rules/printer.test.ts`).
+
+The printer adds exactly the parentheses the parser needs: around a child that binds less tightly
+than its parent, around a right child that is the same operator as its parent (the parser folds to
+the left), and around any non-comparison under `not`.
+
+The type checker runs before printing, as CLAUDE.md invariant 3 requires. Its diagnostics get spans
+afterwards, from the printer's span map, since the rendered text only exists once printed.
+
+### The evaluator
+
+`src/core/rules/evaluate.ts` compiles a verified rule against the scenario dictionary. Every string
+predicate is decided once per dictionary entry and becomes a lookup table indexed by the dictionary
+code, so the per-request work is table lookups and integer comparisons. Evaluation is column at a
+time: each node produces a 0/1 mask over the chunk and `and`, `or`, `not` combine masks.
+
+The correctness argument is `test/unit/rules/evaluate.test.ts`: on generated well-typed rules over
+generated traffic, the columnar evaluator agrees request by request with a naive reference evaluator
+(`src/core/rules/reference.ts`) that shares no code with it and compares strings directly.
 
 Two consequences worth being explicit about, because they change what the parser is *for*:
 
@@ -559,37 +688,61 @@ Two consequences worth being explicit about, because they change what the parser
 Params are small by design: `{ incidentId, scenarioId, seed, symptom }`. Traffic never travels in
 params or step returns, which keeps both under the 1 MiB ceilings.
 
-Idempotency keys are given as the step name, since Workflows caches step results by name and step
-names must be deterministic. All names below are constant or derived from a deterministic loop
-bound.
+Idempotency keys are the step names, since Workflows caches step results by name and step names
+must be deterministic. All names are constants in `src/server/workflow.ts`.
+
+### As built in Phase 1
+
+Phase 1 runs one draft attempt; a failed draft fails the incident visibly. Hypothesis, memory and
+report steps (2, 3, 5, 13) are later phases.
+
+| # | Step | Does | Returns | Retry policy |
+| --- | --- | --- | --- | --- |
+| 1 | `ensure-traffic` | Calls `ensureTrafficChunk` once per chunk (idempotent), then `trafficDigest` | digest, count, chunks | 3, 2 s, exponential |
+| 4 | `aggregate-traffic` | Merges the stored per-chunk partial aggregates into a `TrafficSummary` | `TrafficSummary` | 3, 2 s, exponential |
+| 6.1 | `draft-rule-attempt-1` | Builds the prompt from `prompts/`, calls the model, stores the raw output verbatim | rule version ID | 2, 5 s, exponential |
+| 7.1 | `validate-rule-attempt-1` | Runs the verification pipeline over the stored raw output | status, diagnostic codes | 3, 1 s, exponential |
+| 8.1 | `replay-rule-attempt-1` | Replays each chunk through the stored rule, merges the counts | `ReplayResult` | 3, 2 s, exponential |
+| 8b | `naive-baseline` | Builds the naive rule in code from the summary, verifies it the same way | rule version ID | 3, 1 s, exponential |
+| 8c | `replay-naive-baseline` | Same replay loop for the baseline | `ReplayResult` | 3, 2 s, exponential |
+| 9 | `publish-proposal` | Incident to `awaiting-approval` with `proposedRuleVersionId` set | status | 3, 1 s, exponential |
+| 10 | `wait-for-approval` | `this.waitForApproval(step, { timeout: "7 days" })` | approval metadata | none |
+| 11 | `apply-rule` | Agent re-reads the proposed version and requires an approval row for it | applied rule version ID | 3, 1 s; a refusal is `NonRetryableError` |
+| 12 | `verify-recovery` | Re-parses the applied rule **from its stored text** and replays it | recovery `ReplayResult` | 3, 2 s, exponential |
+| 14 | `persist-incident` | Incident to `applied` with the recovery stored | digest | 3, 1 s, exponential |
+
+If validation fails, a `fail-incident` step marks the incident `failed` with the diagnostic codes
+and the workflow ends. If the approval times out, `mark-timed-out` marks it `timed-out`.
+
+Two corrections to the original plan, both from the docs and the SDK source:
+
+- **An approval timeout throws; it does not return a falsy value.** `waitForEvent` throws on timeout
+  ("Timeout behavior", Workflows docs), and `waitForApproval` is a thin wrapper over it. The
+  workflow catches it and marks the incident `timed-out`.
+- **A rejection is reported to the Agent as a workflow error** (`waitForApproval` calls
+  `step.reportError` before throwing `WorkflowRejectedError`). The `reject` callable records the
+  rejection before signaling, and `onWorkflowError` ignores incidents already in a terminal
+  status, so a rejection is never mislabeled `failed`.
+
+Step progress for the UI is written from inside each step's callback, so a replayed (cached) step
+does not report itself again.
+
+### Planned for Phase 3 onward
 
 | # | Step | Input | Output | Retry policy | Idempotency key |
 | --- | --- | --- | --- | --- | --- |
-| 1 | `ensure-traffic` | scenarioId, seed | `{ trafficDigest, count }` | 3, 2 s, exponential | `ensure-traffic` |
 | 2 | `load-memory` | scenarioId family | prior lessons, evidence IDs | 3, 1 s, exponential | `load-memory` |
 | 3 | `classify-symptom` | symptom, signals | intent enum | 2, 5 s, exponential | `classify-symptom` |
-| 4 | `aggregate-traffic` | trafficDigest | `TrafficSummary` + evidence IDs | 3, 2 s, exponential | `aggregate-traffic` |
 | 5 | `hypothesize` | summary, memory | hypothesis + cited evidence IDs | 2, 5 s, exponential | `hypothesize` |
-| 6.i | `draft-rule-attempt-{i}` | summary, hypothesis, prior diagnostics | `RuleVersion` id | 2, 5 s, exponential | `draft-rule-attempt-{i}` |
-| 7.i | `validate-rule-attempt-{i}` | RuleVersion id | status + diagnostics | 3, 1 s, exponential | `validate-rule-attempt-{i}` |
-| 8.i | `replay-rule-attempt-{i}` | RuleVersion id, trafficDigest | `ReplayResult` | 3, 2 s, exponential | `replay-rule-attempt-{i}` |
-| 9 | `publish-proposal` | winning RuleVersion id | sets incident to awaiting-approval | 3, 1 s, exponential | `publish-proposal` |
-| 10 | `wait-for-approval` | none | approval metadata | none, see below | `waitForApproval` internal |
-| 11 | `apply-rule` | approved RuleVersion **id only** | applied rule version | 3, 2 s, exponential | `apply-rule` |
-| 12 | `verify-recovery` | trafficDigest, applied rule | recovery `ReplayResult` | 3, 2 s, exponential | `verify-recovery` |
+| 6.i, 7.i, 8.i | `draft-rule-attempt-{i}` and friends | as above, plus prior diagnostics | as above | as above | name with `i` |
 | 13 | `write-report` | everything above | report + lesson | 2, 5 s, exponential | `write-report` |
-| 14 | `persist-incident` | report, lesson | final incident row | 3, 1 s, exponential | `persist-incident` |
 
-Steps 6, 7 and 8 form the bounded retry loop. `i` runs from 1 to `MAX_DRAFT_ATTEMPTS` (3). The loop
-bound is a constant, so step names stay deterministic. The loop exits early on the first rule
+Steps 6, 7 and 8 become the bounded retry loop. `i` runs from 1 to `MAX_DRAFT_ATTEMPTS` (3). The
+loop bound is a constant, so step names stay deterministic. The loop exits early on the first rule
 version that reaches status `valid` and clears the scenario thresholds.
 
-Step 10 uses `this.waitForApproval(step, { timeout: "7 days" })`. Rejection surfaces as
-`WorkflowRejectedError` and moves the incident to `rejected`. Timeout moves it to `timed-out`.
-
-Steps 1, 4, 8 and 12 are the CPU-heavy ones. Each calls into the Agent and, when the work exceeds
-one 10 ms slice, drives it as a sequence of chunk calls. The chunk driver reports how many chunks it
-used, which goes into the evidence record, so the demo can honestly show the CPU cost.
+Steps 1, 4, 8 and 12 are the CPU-heavy ones. Each drives its work as a sequence of chunk calls into
+the Agent (step 4 merges partials stored at generation time, so its per-call work is small).
 
 ### Determinism rules this Workflow obeys
 
@@ -673,6 +826,10 @@ Run by the eval harness against the fake model and against the real one:
 3. **Naive baseline.** Bypass the model and generate the single most-correlated-attribute rule
    directly in code. This is the comparison shown in the demo and it is the honest way to
    demonstrate that trap scenarios are real. It needs no model at all, so it always runs.
+   Implemented in `src/core/baseline.ts` as: among the requests showing the symptom (HTTP 401),
+   the single source attribute value (ASN or country) with the largest share, blocked with `eq`.
+   Source attributes only, because blocking the attacked endpoint itself would lock out every real
+   user of it, which nobody would call a mitigation.
 4. **Text output instead of AST.** Ask the model for rule text and parse it. Measures the syntax
    error rate the AST approach avoids, which is the evidence for Decision in section 7.
 
@@ -697,7 +854,7 @@ The README will carry measured numbers or state that none exist yet.
 | All draft attempts exhausted | Loop bound reached | Incident moves to `failed` with all attempts and diagnostics kept. The UI shows what was tried. No rule is proposed |
 | Rule is valid but fails thresholds | Threshold check | Still shown to the operator, clearly marked as failing, with the numbers. The operator decides. Never auto-applied |
 | Step exceeds 10 ms CPU | `exceededCpu` in logs | Chunk driver reduces chunk size; step retries. Chunk size is measured in Phase 0 and set conservatively |
-| Approval times out after 7 days | `waitForApproval` returns falsy | Incident moves to `timed-out`. Nothing is applied |
+| Approval times out after 7 days | `waitForApproval` throws (it wraps `waitForEvent`) | Caught; incident moves to `timed-out`. Nothing is applied |
 | Operator rejects | `WorkflowRejectedError` | Incident moves to `rejected`, reason recorded. Nothing applied |
 | Durable Object evicted mid-run | Not observable from inside | Workflow unaffected. See section 8 |
 | Workers AI rate limited | HTTP 429 | Step retry with exponential backoff. The eval harness avoids this via caching |
@@ -721,7 +878,10 @@ Mitigations, in order of how much they actually help:
    evaluator and by the human. This structural containment is the primary defense and it is why the
    AST decision matters for security and not only for reliability.
 2. **Attacker-controlled strings are clearly delimited and labeled as untrusted data** in the
-   prompt, never interpolated as if they were instructions.
+   prompt, never interpolated as if they were instructions. Every inserted value is JSON-encoded,
+   and additionally `<` and `>` are escaped as `\u003c` and `\u003e`. Found during Phase 1 by a
+   test: `JSON.stringify` alone leaves angle brackets alone, so a user agent containing
+   `</traffic_summary>` would have closed the delimiter early. `src/core/prompt.ts`.
 3. **Hard caps before any string reaches a prompt**: attribute values truncated to a fixed length,
    breakdown rows capped, control characters stripped, and the total prompt bounded. A long user
    agent cannot push the real instructions out of context.
@@ -751,8 +911,9 @@ its violation.
 
 Additional hardening, all cheap:
 
-- `validateStateChange()` rejects any client push that touches incident status, rule versions, or
-  approvals. Clients may only push UI-local preferences.
+- `validateStateChange()` rejects every client push. The UI has no local preferences worth
+  syncing, so the simplest rule is the safest: state is server-owned, and everything a client can
+  change goes through the four `@callable()` methods, whose arguments are validated at the edge.
 - Approval requires the incident to be in `awaiting-approval` and the rule version ID to match
   `Incident.proposedRuleVersionId`. Approving anything else is rejected.
 - Every approval and rejection writes an append-only audit row before the workflow is signaled.
@@ -789,14 +950,18 @@ Explicitly out of scope. Listed so that the absence of each is a decision rather
 
 ## 13. Open items
 
-Carried forward deliberately, to be closed by Phase 0 or by Abhishek.
-
 1. Whether `@cf/meta/llama-3.3-70b-instruct-fp8-fast` is callable on a Workers Free account, and at
-   what rate limit. UNVERIFIED. Blocks nothing structural but changes the eval harness budget and
-   possibly the model choice.
-2. Whether a Durable Object RPC call refreshes the 10 ms CPU budget. UNVERIFIED. Determines whether
-   chunking goes over RPC, `fetch()`, or WebSocket messages.
-3. Measured requests-per-10 ms for the columnar evaluator, which sets `Scenario.requestCount`.
-4. Final grammar. Abhishek owns this. Section 7 is a draft.
-5. Repo name. The assignment specifies `cf_sw_project`; this repository is `cf-swe-project`. Worth
+   what rate limit. UNVERIFIED; the docs suggest yes at 300 per minute (docs/spikes.md, 0.1). The
+   planned fallback, `@cf/meta/llama-3.1-8b-instruct`, was deprecated on 2026-05-30, so a new
+   fallback must be chosen if 0.1 fails.
+2. Whether a Durable Object RPC call refreshes the 10 ms CPU budget. UNVERIFIED (docs/spikes.md,
+   0.2). The Workflow's chunk loops use RPC until measured.
+3. Structured output reliability for rule drafting. UNVERIFIED (docs/spikes.md, 0.4). The harness
+   is built; it needs the account.
+4. ~~Measured requests-per-10 ms~~. Closed: `CHUNK_SIZE = 500`, `requestCount = 6000`, measured
+   locally (docs/spikes.md, 0.3). Re-check `exceededCpu` on the account.
+5. Grammar. Implemented as section 7 describes; Abhishek to review and own it.
+6. Repo name. The assignment specifies `cf_sw_project`; this repository is `cf-swe-project`. Worth
    reconciling before submission since the name was an explicit requirement.
+7. Nothing has been deployed. Deploying needs the account; the local demo runs with
+   `wrangler dev --local` and the fake model (README).
