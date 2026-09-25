@@ -6,6 +6,7 @@
 
 import { useAgent } from "agents/react";
 import { useEffect, useMemo, useState } from "react";
+import { SCENARIOS } from "../../src/core/scenarios";
 import type { Diagnostic, ReplayResult, RuleVersion, TrafficSummary } from "../../src/core/types";
 import type { IncidentAgent } from "../../src/server/agent";
 import type { AgentState, IncidentView, TrafficState } from "../../src/server/views";
@@ -58,7 +59,26 @@ export function App() {
         <h1>Portcullis</h1>
         <p className="tagline">The model proposes. Code verifies. You decide.</p>
         <div className="scenario">
-          Scenario: <strong>{state.scenario.title}</strong>
+          Scenario:{" "}
+          <select
+            value={state.scenario.id}
+            disabled={state.incidents.some((i) => i.status === "investigating" || i.status === "awaiting-approval")}
+            onChange={async (e) => {
+              setError(null);
+              setSelectedId(null);
+              try {
+                await agent.stub.selectScenario(e.target.value);
+              } catch (err) {
+                setError(err instanceof Error ? err.message : String(err));
+              }
+            }}
+          >
+            {SCENARIOS.map((d) => (
+              <option key={d.scenario.id} value={d.scenario.id}>
+                {d.scenario.title}
+              </option>
+            ))}
+          </select>
           {state.scenario.isTrap && <span className="pill">trap: shared {state.scenario.trapAttribute}</span>}
         </div>
       </header>

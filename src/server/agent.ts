@@ -31,8 +31,11 @@ const INCIDENTS_IN_STATE = 10;
 const TERMINAL: readonly IncidentStatus[] = ["applied", "rejected", "failed", "timed-out"];
 const MAX_ID_CHARS = 100;
 
-/** Phase 1 runs one scenario. The registry is the only source of scenario definitions. */
-function activeScenario(): ScenarioDefinition {
+const SETTING_SCENARIO_ID = "scenarioId";
+const WORKFLOW_TRACKING_RETENTION_MS = 7 * 24 * 60 * 60 * 1000;
+
+/** The registry is the only source of scenario definitions; SCENARIOS[0] is the default. */
+function defaultScenario(): ScenarioDefinition {
   const def = SCENARIOS[0];
   if (!def) throw new Error("scenario registry is empty");
   return def;
@@ -54,32 +57,31 @@ function emptyTrafficState(def: ScenarioDefinition): TrafficState {
   };
 }
 
+/** The scenario-derived parts of AgentState, shared by the static initial state and refreshState. */
+function scenarioState(def: ScenarioDefinition): Pick<AgentState, "scenario" | "asnNames" | "traffic"> {
+  const s = def.scenario;
+  return {
+    scenario: {
+      id: s.id,
+      title: s.title,
+      symptom: s.symptom,
+      seed: s.seed,
+      isTrap: s.isTrap,
+      trapAttribute: s.trapAttribute,
+      thresholds: s.thresholds,
+    },
+    asnNames: Object.fromEntries(Object.entries(def.asnNames).map(([k, v]) => [k, v])),
+    traffic: emptyTrafficState(def),
+  };
+}
+
 export class IncidentAgent extends Agent<Env, AgentState> {
-  override initialState: AgentState = IncidentAgent.baseState();
+  override initialState: AgentState = { ...scenarioState(defaultScenario()), incidents: [] };
 
   /** Per-isolate cache. Never authoritative: rebuilt from SQLite on a miss. */
   private compiled = new Map<string, CompiledRule>();
   /** Per-isolate cache of the finished traffic panel, so refreshState stays cheap. */
   private readyTraffic: TrafficState | null = null;
-
-  private static baseState(): AgentState {
-    const def = activeScenario();
-    const s = def.scenario;
-    return {
-      scenario: {
-        id: s.id,
-        title: s.title,
-        symptom: s.symptom,
-        seed: s.seed,
-        isTrap: s.isTrap,
-        trapAttribute: s.trapAttribute,
-        thresholds: s.thresholds,
-      },
-      asnNames: Object.fromEntries(Object.entries(def.asnNames).map(([k, v]) => [k, v])),
-      traffic: emptyTrafficState(def),
-      incidents: [],
-    };
-  }
 
   override async onStart(): Promise<void> {
     store.migrate(this.ctx.storage.sql);
@@ -96,9 +98,30 @@ export class IncidentAgent extends Agent<Env, AgentState> {
     return this.ctx.storage.sql;
   }
 
+  /** The operator's chosen scenario for the live traffic panel and the next investigation. */
+  private activeScenario(): ScenarioDefinition {
+    const id = store.getSetting(this.db, SETTING_SCENARIO_ID);
+    return (id && SCENARIOS.find((d) => d.scenario.id === id)) || defaultScenario();
+  }
+
   // =========================================================================
   // Browser-facing (@callable)
   // =========================================================================
+
+  /**
+   * Switch which scenario the live traffic panel shows and the next investigation targets.
+   * Traffic for every scenario is kept (keyed by scenarioId + seed, store.ts), so switching back
+   * to a previously generated scenario does not regenerate it.
+   */
+  @callable()
+  async selectScenario(scenarioIdInput: unknown): Promise<TrafficState> {
+    if (!isId(scenarioIdInput)) throw new Error("selectScenario takes a scenario ID");
+    const def = SCENARIOS.find((d) => d.scenario.id === scenarioIdInput);
+    if (!def) throw new Error(`unknown scenario ${JSON.stringify(scenarioIdInput)}`);
+    store.setSetting(this.db, SETTING_SCENARIO_ID, def.scenario.id);
+    this.readyTraffic = null;
+    return this.refreshState().traffic;
+  }
 
   /**
    * Generate the next missing traffic chunk. The browser calls this repeatedly on load; each
@@ -107,7 +130,7 @@ export class IncidentAgent extends Agent<Env, AgentState> {
    */
   @callable()
   async generateTrafficChunk(): Promise<TrafficState> {
-    const def = activeScenario();
+    const def = this.activeScenario();
     const have = new Set(store.listChunks(this.db, def.scenario.id, def.scenario.seed).map((c) => c.chunkIndex));
     const next = planChunks(def.scenario.requestCount).find((p) => !have.has(p.index));
     if (next) this.ensureTrafficChunk(def.scenario.id, def.scenario.seed, next.index);
@@ -118,11 +141,14 @@ export class IncidentAgent extends Agent<Env, AgentState> {
   async startInvestigation(symptomInput: unknown): Promise<{ incidentId: string }> {
     const checked = checkSymptom(symptomInput);
     if (!checked.ok) throw new Error(checked.reason);
+    // Retention (DESIGN.md section 11): the SDK does not clean up cf_agents_workflows itself.
+    // Cheap, so it runs on every investigation start rather than needing its own schedule.
+    store.pruneWorkflowTracking(this.db, WORKFLOW_TRACKING_RETENTION_MS, Date.now());
     const active = store.countIncidentsWithStatus(this.db, ["investigating", "awaiting-approval"]);
     if (active >= MAX_ACTIVE_INVESTIGATIONS) {
       throw new Error(`at most ${MAX_ACTIVE_INVESTIGATIONS} investigations can be open at once`);
     }
-    const def = activeScenario();
+    const def = this.activeScenario();
     const incidentId = `inc_${crypto.randomUUID().replace(/-/g, "")}`;
     const now = Date.now();
     const incident: Incident = {
@@ -357,7 +383,9 @@ export class IncidentAgent extends Agent<Env, AgentState> {
   replayRuleChunk(ruleVersionId: string, chunkIndex: number, fromText = false): ChunkReplay {
     const v = this.versionOrThrow(ruleVersionId);
     if (v.status !== "valid" && v.status !== "applied") throw new Error(`rule version is ${v.status}; only verified rules replay`);
-    const def = this.scenarioOrThrow(activeScenario().scenario.id);
+    // The incident's own scenario, not whatever the operator has the live panel pointed at now.
+    const incident = this.incidentOrThrow(v.incidentId);
+    const def = this.scenarioOrThrow(incident.scenarioId);
     const dictionary = compileScenario(def).dictionary;
     const cacheKey = `${ruleVersionId}:${fromText ? "text" : "ast"}`;
     let rule = this.compiled.get(cacheKey);
@@ -373,7 +401,6 @@ export class IncidentAgent extends Agent<Env, AgentState> {
       rule = c.rule;
       this.compiled.set(cacheKey, rule);
     }
-    const incident = this.incidentOrThrow(v.incidentId);
     const blob = store.readChunkBlob(this.db, incident.scenarioId, incident.seed, chunkIndex);
     if (!blob) throw new Error(`chunk ${chunkIndex} missing`);
     const traffic = decodeTraffic(blob, incident.scenarioId, dictionary);
@@ -384,7 +411,8 @@ export class IncidentAgent extends Agent<Env, AgentState> {
   /** Store a merged replay on its rule version. Evidence ID is derived, stable per version. */
   recordReplay(ruleVersionId: string, merged: ChunkReplay): ReplayResult {
     const v = this.versionOrThrow(ruleVersionId);
-    const def = this.scenarioOrThrow(activeScenario().scenario.id);
+    const incident = this.incidentOrThrow(v.incidentId);
+    const def = this.scenarioOrThrow(incident.scenarioId);
     const result = toReplayResult(merged.counts, def.scenario.thresholds, `ev_replay_${v.source === "model" ? v.attempt : "baseline"}`);
     store.saveRuleVersion(this.db, { ...v, replay: result });
     store.savePanel(this.db, ruleVersionId, merged.blockedPanel);
@@ -503,14 +531,14 @@ export class IncidentAgent extends Agent<Env, AgentState> {
 
   /** Rebuild the broadcast state from SQLite. The only writer of this.state. */
   private refreshState(): AgentState {
-    const next: AgentState = { ...IncidentAgent.baseState(), traffic: this.trafficState(), incidents: this.incidentViews() };
+    const def = this.activeScenario();
+    const next: AgentState = { ...scenarioState(def), traffic: this.trafficState(def), incidents: this.incidentViews() };
     this.setState(next);
     return next;
   }
 
-  private trafficState(): TrafficState {
+  private trafficState(def: ScenarioDefinition): TrafficState {
     if (this.readyTraffic) return this.readyTraffic;
-    const def = activeScenario();
     const rows = store.listChunks(this.db, def.scenario.id, def.scenario.seed);
     const total = planChunks(def.scenario.requestCount).length;
     const traffic: TrafficState = { ...emptyTrafficState(def), chunksDone: rows.length };

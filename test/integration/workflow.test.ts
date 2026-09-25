@@ -200,6 +200,40 @@ describe("the bounded draft retry loop (Phase 3)", () => {
   });
 });
 
+describe("scenario selection (Phase 4)", () => {
+  it("defaults to the first registered scenario, and selectScenario switches it", async () => {
+    const agent = await agentNamed("scn-select");
+    const initial = await agent.state;
+    expect(initial.scenario.id).toBe("cs-trap-carrier");
+
+    const traffic = await agent.selectScenario("l7-hosting-easy");
+    expect(traffic.status).toBe("empty");
+    const after = await agent.state;
+    expect(after.scenario.id).toBe("l7-hosting-easy");
+    expect(after.scenario.isTrap).toBe(false);
+  });
+
+  it("rejects an unknown scenario id", async () => {
+    const agent = await agentNamed("scn-select-bad");
+    expect(await errorOf(() => agent.selectScenario("not-a-real-scenario"))).toMatch(/unknown scenario/);
+  });
+
+  it("a new investigation targets the currently selected scenario, and replay uses the incident's own scenario even after switching away", async () => {
+    const agent = await agentNamed("scn-select-investigate");
+    await agent.selectScenario("cs-hosting-easy");
+    const { incidentId } = await agent.startInvestigation("login endpoint is getting hammered");
+    const incident = await waitForIncident(agent, incidentId, ["awaiting-approval", "failed"]);
+    expect(incident.scenarioId).toBe("cs-hosting-easy");
+
+    // Switch the live panel away from the incident's scenario; its own replay must not follow.
+    await agent.selectScenario("l7-hosting-easy");
+    const state = await agent.state;
+    expect(state.scenario.id).toBe("l7-hosting-easy");
+    const view = state.incidents.find((i) => i.id === incidentId);
+    expect(view?.proposed?.replay?.attackTotal ?? 0).toBeGreaterThan(0);
+  });
+});
+
 describe("input validation at the edge", () => {
   it("rejects an oversized or empty symptom", async () => {
     const agent = await agentNamed("edge");

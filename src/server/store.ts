@@ -1,7 +1,7 @@
 // SQLite persistence for the Agent. Plain functions over SqlStorage so the schema and the
 // queries are in one place. JSON columns hold values that are only ever read back whole.
 
-import type { Diagnostic, Incident, IncidentStatus, ReplayResult, RuleAST, RuleVersion } from "../core/types";
+import type { Diagnostic, Evidence, Incident, IncidentStatus, ReplayResult, RuleAST, RuleVersion } from "../core/types";
 import type { StepStatus, StepView } from "./views";
 
 export const SCHEMA = [
@@ -63,6 +63,31 @@ export const SCHEMA = [
   `CREATE TABLE IF NOT EXISTS summaries (
      incident_id TEXT PRIMARY KEY,
      data TEXT NOT NULL
+   )`,
+  // Small durable settings, currently just the operator's chosen scenario. A table rather than
+  // Agent state so it survives eviction the same way everything else here does.
+  `CREATE TABLE IF NOT EXISTS settings (
+     key TEXT PRIMARY KEY,
+     value TEXT NOT NULL
+   )`,
+  // Evidence ledger: one row per deterministic claim a hypothesis or the UI can cite. Phase 4.
+  `CREATE TABLE IF NOT EXISTS evidence (
+     id TEXT NOT NULL,
+     incident_id TEXT NOT NULL,
+     kind TEXT NOT NULL,
+     claim TEXT NOT NULL,
+     produced_by TEXT NOT NULL,
+     data TEXT NOT NULL,
+     created_at INTEGER NOT NULL,
+     PRIMARY KEY (incident_id, id)
+   )`,
+  // One sentence per finished incident, retrieved by later investigations in the same family.
+  `CREATE TABLE IF NOT EXISTS lessons (
+     seq INTEGER PRIMARY KEY AUTOINCREMENT,
+     scenario_family TEXT NOT NULL,
+     lesson TEXT NOT NULL,
+     incident_id TEXT NOT NULL,
+     created_at INTEGER NOT NULL
    )`,
 ];
 
@@ -335,4 +360,111 @@ export function getPanel(sql: SqlStorage, ruleVersionId: string | null): number[
   if (!ruleVersionId) return null;
   const raw = sql.exec<{ panel: string }>("SELECT panel FROM replay_panels WHERE rule_version_id = ?", ruleVersionId).toArray()[0];
   return raw ? (JSON.parse(raw.panel) as number[][]) : null;
+}
+
+// ---------------------------------------------------------------------------
+// Settings (small durable key/value, currently just the chosen scenario)
+// ---------------------------------------------------------------------------
+
+export function getSetting(sql: SqlStorage, key: string): string | null {
+  return sql.exec<{ value: string }>("SELECT value FROM settings WHERE key = ?", key).toArray()[0]?.value ?? null;
+}
+
+export function setSetting(sql: SqlStorage, key: string, value: string): void {
+  sql.exec("INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value", key, value);
+}
+
+// ---------------------------------------------------------------------------
+// Evidence ledger
+// ---------------------------------------------------------------------------
+
+type EvidenceRow = {
+  id: string;
+  incident_id: string;
+  kind: string;
+  claim: string;
+  produced_by: string;
+  data: string;
+  created_at: number;
+};
+
+export function saveEvidence(sql: SqlStorage, e: Evidence): void {
+  sql.exec(
+    `INSERT INTO evidence (id, incident_id, kind, claim, produced_by, data, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)
+     ON CONFLICT(incident_id, id) DO NOTHING`,
+    e.id,
+    e.incidentId,
+    e.kind,
+    e.claim,
+    e.producedBy,
+    JSON.stringify(e.data),
+    e.createdAt,
+  );
+}
+
+export function listEvidence(sql: SqlStorage, incidentId: string): Evidence[] {
+  return sql
+    .exec<EvidenceRow>("SELECT * FROM evidence WHERE incident_id = ? ORDER BY rowid", incidentId)
+    .toArray()
+    .map((r) => ({
+      id: r.id,
+      incidentId: r.incident_id,
+      kind: r.kind as Evidence["kind"],
+      claim: r.claim,
+      producedBy: r.produced_by,
+      data: JSON.parse(r.data) as unknown,
+      createdAt: r.created_at,
+    }));
+}
+
+export function getEvidenceIds(sql: SqlStorage, incidentId: string): Set<string> {
+  return new Set(sql.exec<{ id: string }>("SELECT id FROM evidence WHERE incident_id = ?", incidentId).toArray().map((r) => r.id));
+}
+
+// ---------------------------------------------------------------------------
+// Lessons: retrieved by scenario family for later investigations. Phase 4.
+// ---------------------------------------------------------------------------
+
+export type LessonRow = { scenarioFamily: string; lesson: string; incidentId: string; createdAt: number };
+
+export function saveLesson(sql: SqlStorage, row: LessonRow): void {
+  sql.exec(
+    "INSERT INTO lessons (scenario_family, lesson, incident_id, created_at) VALUES (?, ?, ?, ?)",
+    row.scenarioFamily,
+    row.lesson,
+    row.incidentId,
+    row.createdAt,
+  );
+}
+
+/** Most recent lessons for a scenario family, newest first, excluding the given incident. */
+export function recentLessons(sql: SqlStorage, scenarioFamily: string, excludeIncidentId: string, limit: number): LessonRow[] {
+  return sql
+    .exec<{ scenario_family: string; lesson: string; incident_id: string; created_at: number }>(
+      "SELECT * FROM lessons WHERE scenario_family = ? AND incident_id != ? ORDER BY created_at DESC LIMIT ?",
+      scenarioFamily,
+      excludeIncidentId,
+      limit,
+    )
+    .toArray()
+    .map((r) => ({ scenarioFamily: r.scenario_family, lesson: r.lesson, incidentId: r.incident_id, createdAt: r.created_at }));
+}
+
+// ---------------------------------------------------------------------------
+// Retention: cf_agents_workflows grows unbounded, the SDK does not clean it up. DESIGN.md
+// section 11. Deletes tracking rows for workflows finished more than `olderThanMs` ago.
+// ---------------------------------------------------------------------------
+
+/**
+ * Deletes `complete`/`errored` `cf_agents_workflows` tracking rows older than `olderThanMs`.
+ * That table is the Agents SDK's own (`agents/src/index.ts`, `runWorkflow`), keyed by
+ * `updated_at` stored as `unixepoch()` (whole seconds, not `Date.now()`'s milliseconds) -- the
+ * cutoff below is converted to match. Returns how many rows were deleted.
+ */
+export function pruneWorkflowTracking(sql: SqlStorage, olderThanMs: number, now: number): number {
+  const cutoffSeconds = Math.floor((now - olderThanMs) / 1000);
+  const before = sql.exec<{ n: number }>("SELECT COUNT(*) as n FROM cf_agents_workflows").toArray()[0]?.n ?? 0;
+  sql.exec("DELETE FROM cf_agents_workflows WHERE status IN ('complete', 'errored') AND updated_at < ?", cutoffSeconds);
+  const after = sql.exec<{ n: number }>("SELECT COUNT(*) as n FROM cf_agents_workflows").toArray()[0]?.n ?? 0;
+  return before - after;
 }
