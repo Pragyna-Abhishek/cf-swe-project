@@ -1,0 +1,40 @@
+{
+  "name": "portcullis",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "vite build",
+    "dev": "npm run build && wrangler dev",
+    "deploy": "npm run build && wrangler deploy",
+    "typecheck": "tsc --noEmit -p .",
+    "test": "npm run test:unit && npm run test:integration",
+    "test:unit": "vitest run --config vitest.config.ts",
+    "test:integration": "vitest run --config vitest.integration.config.ts --max-workers=1 --no-isolate",
+    "coverage": "vitest run --config vitest.config.ts --coverage",
+    "bench": "vitest run --config vitest.bench.config.ts",
+    "cf-typegen": "wrangler types --include-runtime=false --strict-vars=false"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/client": "2.0.0",
+    "@modelcontextprotocol/sdk": "1.30.0",
+    "@modelcontextprotocol/server": "2.0.0",
+    "agents": "0.24.0",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "zod": "4.6.5"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-plugin": "1.2.7",
+    "@cloudflare/workers-types": "5.20260925.2",
+    "@types/node": "22.19.1",
+    "@types/react": "19.2.2",
+    "@types/react-dom": "19.2.2",
+    "@vitejs/plugin-react": "6.1.1",
+    "@vitest/coverage-istanbul": "4.1.11",
+    "typescript": "5.9.3",
+    "vite": "8.3.1",
+    "vitest": "4.1.11",
+    "wrangler": "4.140.0"
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "portcullis",
+  "main": "src/server/index.ts",
+  "compatibility_date": "2026-09-20",
+  "compatibility_flags": ["nodejs_compat"],
+  // The Workflow's originating path is keyed by constructor.name, so class names
+  // must survive bundling. See DESIGN.md section 8 and CLAUDE.md invariant 11.
+  "keep_names": true,
+  "minify": false,
+  "rules": [{ "type": "Text", "globs": ["prompts/*.txt"], "fallthrough": true }],
+  "assets": {
+    "directory": "dist/client",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/agents/*"]
+  },
+  "durable_objects": {
+    "bindings": [{ "name": "IncidentAgent", "class_name": "IncidentAgent" }]
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["IncidentAgent"] }],
+  "workflows": [
+    {
+      "name": "portcullis-investigation",
+      "binding": "INVESTIGATION_WORKFLOW",
+      "class_name": "InvestigationWorkflow"
+    }
+  ],
+  "ai": { "binding": "AI" },
+  "vars": {
+    // "workers-ai" in production. Tests override this to "fake".
+    "MODEL_MODE": "workers-ai",
+    "MODEL_ID": "@cf/meta/llama-3.3-70b-instruct-fp8-fast"
+  },
+  "observability": { "enabled": true }
+}

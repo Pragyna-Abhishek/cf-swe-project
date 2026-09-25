@@ -1,0 +1,13 @@
+// Phase 0 spike Worker. Deployed separately from the product so no measurement code ships in
+// it. See docs/spikes.md for how to run it and where results go.
+{
+  "$schema": "../node_modules/wrangler/config-schema.json",
+  "name": "portcullis-spikes",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-09-20",
+  "compatibility_flags": ["nodejs_compat"],
+  "durable_objects": { "bindings": [{ "name": "BURNER", "class_name": "Burner" }] },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["Burner"] }],
+  "ai": { "binding": "AI" },
+  "vars": { "MODEL_ID": "@cf/meta/llama-3.3-70b-instruct-fp8-fast" }
+}
