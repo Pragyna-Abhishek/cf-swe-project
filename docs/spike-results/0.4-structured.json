@@ -1,0 +1,764 @@
+{
+  "measuredAt": "2026-09-25T21:43:00.373Z",
+  "summary": {
+    "attempts": 30,
+    "validJson": "0/30",
+    "schemaValid": "0/30",
+    "typeValid": "0/30",
+    "jsonModeFailed": "0/30",
+    "otherErrors": "0/30",
+    "passesThresholds": "0/30"
+  },
+  "attempts": [
+    {
+      "shape": "cs-trap-carrier",
+      "seed": 1,
+      "ms": 34994,
+      "responseKind": "ok",
+      "raw": "{\"rule\": {\"kind\": \"and\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"",
+      "validJson": false,
+      "status": "invalid-schema",
+      "text": null,
+      "diagnostics": [
+        "E_SCHEMA_NOT_JSON"
+      ],
+      "replay": null,
+      "baselineReplay": {
+        "attackTotal": 1723,
+        "attackBlocked": 1050,
+        "legitimateTotal": 4277,
+        "legitimateBlocked": 1889,
+        "attackBlockedRate": 0.6094022054556006,
+        "legitimateBlockedRate": 0.44166471826046294,
+        "safetyScore": 0.340250752075748,
+        "passesThresholds": false,
+        "evidenceId": "spike"
+      }
+    },
+    {
+      "shape": "cs-trap-carrier",
+      "seed": 2,
+      "ms": 28990,
+      "responseKind": "ok",
+      "raw": "{\"rule\": {\"kind\": \"and\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"",
+      "validJson": false,
+      "status": "invalid-schema",
+      "text": null,
+      "diagnostics": [
+        "E_SCHEMA_NOT_JSON"
+      ],
+      "replay": null,
+      "baselineReplay": {
+        "attackTotal": 1690,
+        "attackBlocked": 1050,
+        "legitimateTotal": 4310,
+        "legitimateBlocked": 1969,
+        "attackBlockedRate": 0.621301775147929,
+        "legitimateBlockedRate": 0.4568445475638051,
+        "safetyScore": 0.3374634467798844,
+        "passesThresholds": false,
+        "evidenceId": "spike"
+      }
+    },
+    {
+      "shape": "cs-trap-carrier",
+      "seed": 3,
+      "ms": 31288,
+      "responseKind": "ok",
+      "raw": "{\"rule\": {\"kind\": \"and\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"",
+      "validJson": false,
+      "status": "invalid-schema",
+      "text": null,
+      "diagnostics": [
+        "E_SCHEMA_NOT_JSON"
+      ],
+      "replay": null,
+      "baselineReplay": {
+        "attackTotal": 1676,
+        "attackBlocked": 1049,
+        "legitimateTotal": 4324,
+        "legitimateBlocked": 1915,
+        "attackBlockedRate": 0.6258949880668258,
+        "legitimateBlockedRate": 0.4428769657724329,
+        "safetyScore": 0.34870051485961684,
+        "passesThresholds": false,
+        "evidenceId": "spike"
+      }
+    },
+    {
+      "shape": "cs-trap-carrier",
+      "seed": 4,
+      "ms": 29656,
+      "responseKind": "ok",
+      "raw": "{\"rule\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"",
+      "validJson": false,
+      "status": "invalid-schema",
+      "text": null,
+      "diagnostics": [
+        "E_SCHEMA_NOT_JSON"
+      ],
+      "replay": null,
+      "baselineReplay": {
+        "attackTotal": 1692,
+        "attackBlocked": 1054,
+        "legitimateTotal": 4308,
+        "legitimateBlocked": 1956,
+        "attackBlockedRate": 0.6229314420803782,
+        "legitimateBlockedRate": 0.45403899721448465,
+        "safetyScore": 0.3400962747848304,
+        "passesThresholds": false,
+        "evidenceId": "spike"
+      }
+    },
+    {
+      "shape": "cs-trap-carrier",
+      "seed": 5,
+      "ms": 34158,
+      "responseKind": "ok",
+      "raw": "{\"rule\": {\"kind\": \"and\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"",
+      "validJson": false,
+      "status": "invalid-schema",
+      "text": null,
+      "diagnostics": [
+        "E_SCHEMA_NOT_JSON"
+      ],
+      "replay": null,
+      "baselineReplay": {
+        "attackTotal": 1656,
+        "attackBlocked": 1040,
+        "legitimateTotal": 4344,
+        "legitimateBlocked": 1946,
+        "attackBlockedRate": 0.6280193236714976,
+        "legitimateBlockedRate": 0.4479742173112339,
+        "safetyScore": 0.346682858693428,
+        "passesThresholds": false,
+        "evidenceId": "spike"
+      }
+    },
+    {
+      "shape": "cs-trap-carrier",
+      "seed": 6,
+      "ms": 25943,
+      "responseKind": "ok",
+      "raw": "{\"rule\": {\"kind\": \"and\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"",
+      "validJson": false,
+      "status": "invalid-schema",
+      "text": null,
+      "diagnostics": [
+        "E_SCHEMA_NOT_JSON"
+      ],
+      "replay": null,
+      "baselineReplay": {
+        "attackTotal": 1705,
+        "attackBlocked": 1062,
+        "legitimateTotal": 4295,
+        "legitimateBlocked": 2004,
+        "attackBlockedRate": 0.6228739002932552,
+        "legitimateBlockedRate": 0.46658905704307335,
+        "safetyScore": 0.332247754498684,
+        "passesThresholds": false,
+        "evidenceId": "spike"
+      }
+    },
+    {
+      "shape": "cs-trap-carrier",
+      "seed": 7,
+      "ms": 35671,
+      "responseKind": "ok",
+      "raw": "{\"rule\": {\"kind\": \"and\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"",
+      "validJson": false,
+      "status": "invalid-schema",
+      "text": null,
+      "diagnostics": [
+        "E_SCHEMA_NOT_JSON"
+      ],
+      "replay": null,
+      "baselineReplay": {
+        "attackTotal": 1678,
+        "attackBlocked": 1039,
+        "legitimateTotal": 4322,
+        "legitimateBlocked": 1929,
+        "attackBlockedRate": 0.6191895113230036,
+        "legitimateBlockedRate": 0.44632114761684405,
+        "safetyScore": 0.3428321380370078,
+        "passesThresholds": false,
+        "evidenceId": "spike"
+      }
+    },
+    {
+      "shape": "cs-trap-carrier",
+      "seed": 8,
+      "ms": 26615,
+      "responseKind": "ok",
+      "raw": "{\"rule\": {\"kind\": \"and\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"",
+      "validJson": false,
+      "status": "invalid-schema",
+      "text": null,
+      "diagnostics": [
+        "E_SCHEMA_NOT_JSON"
+      ],
+      "replay": null,
+      "baselineReplay": {
+        "attackTotal": 1730,
+        "attackBlocked": 1106,
+        "legitimateTotal": 4270,
+        "legitimateBlocked": 1945,
+        "attackBlockedRate": 0.6393063583815028,
+        "legitimateBlockedRate": 0.45550351288056207,
+        "safetyScore": 0.34810006633184876,
+        "passesThresholds": false,
+        "evidenceId": "spike"
+      }
+    },
+    {
+      "shape": "cs-trap-carrier",
+      "seed": 9,
+      "ms": 27146,
+      "responseKind": "ok",
+      "raw": "{\"rule\": {\"kind\": \"and\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"",
+      "validJson": false,
+      "status": "invalid-schema",
+      "text": null,
+      "diagnostics": [
+        "E_SCHEMA_NOT_JSON"
+      ],
+      "replay": null,
+      "baselineReplay": {
+        "attackTotal": 1725,
+        "attackBlocked": 1095,
+        "legitimateTotal": 4275,
+        "legitimateBlocked": 1961,
+        "attackBlockedRate": 0.6347826086956522,
+        "legitimateBlockedRate": 0.4587134502923977,
+        "safetyScore": 0.3435992880752606,
+        "passesThresholds": false,
+        "evidenceId": "spike"
+      }
+    },
+    {
+      "shape": "cs-trap-carrier",
+      "seed": 10,
+      "ms": 27167,
+      "responseKind": "ok",
+      "raw": "{\"rule\": {\"kind\": \"and\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"",
+      "validJson": false,
+      "status": "invalid-schema",
+      "text": null,
+      "diagnostics": [
+        "E_SCHEMA_NOT_JSON"
+      ],
+      "replay": null,
+      "baselineReplay": {
+        "attackTotal": 1704,
+        "attackBlocked": 1045,
+        "legitimateTotal": 4296,
+        "legitimateBlocked": 1961,
+        "attackBlockedRate": 0.6132629107981221,
+        "legitimateBlockedRate": 0.45647113594040967,
+        "safetyScore": 0.3333260932759812,
+        "passesThresholds": false,
+        "evidenceId": "spike"
+      }
+    },
+    {
+      "shape": "cs-trap-single-ua",
+      "seed": 1,
+      "ms": 27421,
+      "responseKind": "ok",
+      "raw": "{\"rule\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"",
+      "validJson": false,
+      "status": "invalid-schema",
+      "text": null,
+      "diagnostics": [
+        "E_SCHEMA_NOT_JSON"
+      ],
+      "replay": null,
+      "baselineReplay": {
+        "attackTotal": 1723,
+        "attackBlocked": 1050,
+        "legitimateTotal": 4277,
+        "legitimateBlocked": 1889,
+        "attackBlockedRate": 0.6094022054556006,
+        "legitimateBlockedRate": 0.44166471826046294,
+        "safetyScore": 0.340250752075748,
+        "passesThresholds": false,
+        "evidenceId": "spike"
+      }
+    },
+    {
+      "shape": "cs-trap-single-ua",
+      "seed": 2,
+      "ms": 26208,
+      "responseKind": "ok",
+      "raw": "{\"rule\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"",
+      "validJson": false,
+      "status": "invalid-schema",
+      "text": null,
+      "diagnostics": [
+        "E_SCHEMA_NOT_JSON"
+      ],
+      "replay": null,
+      "baselineReplay": {
+        "attackTotal": 1690,
+        "attackBlocked": 1050,
+        "legitimateTotal": 4310,
+        "legitimateBlocked": 1969,
+        "attackBlockedRate": 0.621301775147929,
+        "legitimateBlockedRate": 0.4568445475638051,
+        "safetyScore": 0.3374634467798844,
+        "passesThresholds": false,
+        "evidenceId": "spike"
+      }
+    },
+    {
+      "shape": "cs-trap-single-ua",
+      "seed": 3,
+      "ms": 29266,
+      "responseKind": "ok",
+      "raw": "{\"rule\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"",
+      "validJson": false,
+      "status": "invalid-schema",
+      "text": null,
+      "diagnostics": [
+        "E_SCHEMA_NOT_JSON"
+      ],
+      "replay": null,
+      "baselineReplay": {
+        "attackTotal": 1676,
+        "attackBlocked": 1049,
+        "legitimateTotal": 4324,
+        "legitimateBlocked": 1915,
+        "attackBlockedRate": 0.6258949880668258,
+        "legitimateBlockedRate": 0.4428769657724329,
+        "safetyScore": 0.34870051485961684,
+        "passesThresholds": false,
+        "evidenceId": "spike"
+      }
+    },
+    {
+      "shape": "cs-trap-single-ua",
+      "seed": 4,
+      "ms": 27041,
+      "responseKind": "ok",
+      "raw": "{\"rule\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"",
+      "validJson": false,
+      "status": "invalid-schema",
+      "text": null,
+      "diagnostics": [
+        "E_SCHEMA_NOT_JSON"
+      ],
+      "replay": null,
+      "baselineReplay": {
+        "attackTotal": 1692,
+        "attackBlocked": 1054,
+        "legitimateTotal": 4308,
+        "legitimateBlocked": 1956,
+        "attackBlockedRate": 0.6229314420803782,
+        "legitimateBlockedRate": 0.45403899721448465,
+        "safetyScore": 0.3400962747848304,
+        "passesThresholds": false,
+        "evidenceId": "spike"
+      }
+    },
+    {
+      "shape": "cs-trap-single-ua",
+      "seed": 5,
+      "ms": 26859,
+      "responseKind": "ok",
+      "raw": "{\"rule\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"",
+      "validJson": false,
+      "status": "invalid-schema",
+      "text": null,
+      "diagnostics": [
+        "E_SCHEMA_NOT_JSON"
+      ],
+      "replay": null,
+      "baselineReplay": {
+        "attackTotal": 1656,
+        "attackBlocked": 1040,
+        "legitimateTotal": 4344,
+        "legitimateBlocked": 1946,
+        "attackBlockedRate": 0.6280193236714976,
+        "legitimateBlockedRate": 0.4479742173112339,
+        "safetyScore": 0.346682858693428,
+        "passesThresholds": false,
+        "evidenceId": "spike"
+      }
+    },
+    {
+      "shape": "cs-trap-single-ua",
+      "seed": 6,
+      "ms": 27388,
+      "responseKind": "ok",
+      "raw": "{\"rule\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"",
+      "validJson": false,
+      "status": "invalid-schema",
+      "text": null,
+      "diagnostics": [
+        "E_SCHEMA_NOT_JSON"
+      ],
+      "replay": null,
+      "baselineReplay": {
+        "attackTotal": 1705,
+        "attackBlocked": 1062,
+        "legitimateTotal": 4295,
+        "legitimateBlocked": 2004,
+        "attackBlockedRate": 0.6228739002932552,
+        "legitimateBlockedRate": 0.46658905704307335,
+        "safetyScore": 0.332247754498684,
+        "passesThresholds": false,
+        "evidenceId": "spike"
+      }
+    },
+    {
+      "shape": "cs-trap-single-ua",
+      "seed": 7,
+      "ms": 27835,
+      "responseKind": "ok",
+      "raw": "{\"rule\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"",
+      "validJson": false,
+      "status": "invalid-schema",
+      "text": null,
+      "diagnostics": [
+        "E_SCHEMA_NOT_JSON"
+      ],
+      "replay": null,
+      "baselineReplay": {
+        "attackTotal": 1678,
+        "attackBlocked": 1039,
+        "legitimateTotal": 4322,
+        "legitimateBlocked": 1929,
+        "attackBlockedRate": 0.6191895113230036,
+        "legitimateBlockedRate": 0.44632114761684405,
+        "safetyScore": 0.3428321380370078,
+        "passesThresholds": false,
+        "evidenceId": "spike"
+      }
+    },
+    {
+      "shape": "cs-trap-single-ua",
+      "seed": 8,
+      "ms": 29509,
+      "responseKind": "ok",
+      "raw": "{\"rule\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"",
+      "validJson": false,
+      "status": "invalid-schema",
+      "text": null,
+      "diagnostics": [
+        "E_SCHEMA_NOT_JSON"
+      ],
+      "replay": null,
+      "baselineReplay": {
+        "attackTotal": 1730,
+        "attackBlocked": 1106,
+        "legitimateTotal": 4270,
+        "legitimateBlocked": 1945,
+        "attackBlockedRate": 0.6393063583815028,
+        "legitimateBlockedRate": 0.45550351288056207,
+        "safetyScore": 0.34810006633184876,
+        "passesThresholds": false,
+        "evidenceId": "spike"
+      }
+    },
+    {
+      "shape": "cs-trap-single-ua",
+      "seed": 9,
+      "ms": 28417,
+      "responseKind": "ok",
+      "raw": "{\"rule\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"",
+      "validJson": false,
+      "status": "invalid-schema",
+      "text": null,
+      "diagnostics": [
+        "E_SCHEMA_NOT_JSON"
+      ],
+      "replay": null,
+      "baselineReplay": {
+        "attackTotal": 1725,
+        "attackBlocked": 1095,
+        "legitimateTotal": 4275,
+        "legitimateBlocked": 1961,
+        "attackBlockedRate": 0.6347826086956522,
+        "legitimateBlockedRate": 0.4587134502923977,
+        "safetyScore": 0.3435992880752606,
+        "passesThresholds": false,
+        "evidenceId": "spike"
+      }
+    },
+    {
+      "shape": "cs-trap-single-ua",
+      "seed": 10,
+      "ms": 26945,
+      "responseKind": "ok",
+      "raw": "{\"rule\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"",
+      "validJson": false,
+      "status": "invalid-schema",
+      "text": null,
+      "diagnostics": [
+        "E_SCHEMA_NOT_JSON"
+      ],
+      "replay": null,
+      "baselineReplay": {
+        "attackTotal": 1704,
+        "attackBlocked": 1045,
+        "legitimateTotal": 4296,
+        "legitimateBlocked": 1961,
+        "attackBlockedRate": 0.6132629107981221,
+        "legitimateBlockedRate": 0.45647113594040967,
+        "safetyScore": 0.3333260932759812,
+        "passesThresholds": false,
+        "evidenceId": "spike"
+      }
+    },
+    {
+      "shape": "cs-hosting-only",
+      "seed": 1,
+      "ms": 31918,
+      "responseKind": "ok",
+      "raw": "{\"rule\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"",
+      "validJson": false,
+      "status": "invalid-schema",
+      "text": null,
+      "diagnostics": [
+        "E_SCHEMA_NOT_JSON"
+      ],
+      "replay": null,
+      "baselineReplay": {
+        "attackTotal": 1723,
+        "attackBlocked": 945,
+        "legitimateTotal": 4277,
+        "legitimateBlocked": 2154,
+        "attackBlockedRate": 0.5484619849100406,
+        "legitimateBlockedRate": 0.5036240355389292,
+        "safetyScore": 0.27224334672995465,
+        "passesThresholds": false,
+        "evidenceId": "spike"
+      }
+    },
+    {
+      "shape": "cs-hosting-only",
+      "seed": 2,
+      "ms": 30819,
+      "responseKind": "ok",
+      "raw": "{\"rule\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"",
+      "validJson": false,
+      "status": "invalid-schema",
+      "text": null,
+      "diagnostics": [
+        "E_SCHEMA_NOT_JSON"
+      ],
+      "replay": null,
+      "baselineReplay": {
+        "attackTotal": 1690,
+        "attackBlocked": 917,
+        "legitimateTotal": 4310,
+        "legitimateBlocked": 2152,
+        "attackBlockedRate": 0.5426035502958579,
+        "legitimateBlockedRate": 0.49930394431554526,
+        "safetyScore": 0.27167945743351773,
+        "passesThresholds": false,
+        "evidenceId": "spike"
+      }
+    },
+    {
+      "shape": "cs-hosting-only",
+      "seed": 3,
+      "ms": 34213,
+      "responseKind": "ok",
+      "raw": "{\"rule\": {\"kind\": \"and\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"",
+      "validJson": false,
+      "status": "invalid-schema",
+      "text": null,
+      "diagnostics": [
+        "E_SCHEMA_NOT_JSON"
+      ],
+      "replay": null,
+      "baselineReplay": {
+        "attackTotal": 1676,
+        "attackBlocked": 919,
+        "legitimateTotal": 4324,
+        "legitimateBlocked": 2094,
+        "attackBlockedRate": 0.5483293556085919,
+        "legitimateBlockedRate": 0.4842738205365402,
+        "safetyScore": 0.2827878036556799,
+        "passesThresholds": false,
+        "evidenceId": "spike"
+      }
+    },
+    {
+      "shape": "cs-hosting-only",
+      "seed": 4,
+      "ms": 29551,
+      "responseKind": "ok",
+      "raw": "{\"rule\": {\"kind\": \"and\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"",
+      "validJson": false,
+      "status": "invalid-schema",
+      "text": null,
+      "diagnostics": [
+        "E_SCHEMA_NOT_JSON"
+      ],
+      "replay": null,
+      "baselineReplay": {
+        "attackTotal": 1692,
+        "attackBlocked": 920,
+        "legitimateTotal": 4308,
+        "legitimateBlocked": 2202,
+        "attackBlockedRate": 0.5437352245862884,
+        "legitimateBlockedRate": 0.5111420612813371,
+        "safetyScore": 0.2658092810999822,
+        "passesThresholds": false,
+        "evidenceId": "spike"
+      }
+    },
+    {
+      "shape": "cs-hosting-only",
+      "seed": 5,
+      "ms": 34222,
+      "responseKind": "ok",
+      "raw": "{\"rule\": {\"kind\": \"and\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"",
+      "validJson": false,
+      "status": "invalid-schema",
+      "text": null,
+      "diagnostics": [
+        "E_SCHEMA_NOT_JSON"
+      ],
+      "replay": null,
+      "baselineReplay": {
+        "attackTotal": 1656,
+        "attackBlocked": 912,
+        "legitimateTotal": 4344,
+        "legitimateBlocked": 2132,
+        "attackBlockedRate": 0.5507246376811594,
+        "legitimateBlockedRate": 0.49079189686924496,
+        "safetyScore": 0.2804334481009955,
+        "passesThresholds": false,
+        "evidenceId": "spike"
+      }
+    },
+    {
+      "shape": "cs-hosting-only",
+      "seed": 6,
+      "ms": 28292,
+      "responseKind": "ok",
+      "raw": "{\"rule\": {\"kind\": \"and\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"",
+      "validJson": false,
+      "status": "invalid-schema",
+      "text": null,
+      "diagnostics": [
+        "E_SCHEMA_NOT_JSON"
+      ],
+      "replay": null,
+      "baselineReplay": {
+        "attackTotal": 1705,
+        "attackBlocked": 909,
+        "legitimateTotal": 4295,
+        "legitimateBlocked": 2199,
+        "attackBlockedRate": 0.5331378299120234,
+        "legitimateBlockedRate": 0.5119906868451688,
+        "safetyScore": 0.26017622619222375,
+        "passesThresholds": false,
+        "evidenceId": "spike"
+      }
+    },
+    {
+      "shape": "cs-hosting-only",
+      "seed": 7,
+      "ms": 26211,
+      "responseKind": "ok",
+      "raw": "{\"rule\": {\"kind\": \"and\", \"left\": {\"kind\": \"and\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"",
+      "validJson": false,
+      "status": "invalid-schema",
+      "text": null,
+      "diagnostics": [
+        "E_SCHEMA_NOT_JSON"
+      ],
+      "replay": null,
+      "baselineReplay": {
+        "attackTotal": 1678,
+        "attackBlocked": 912,
+        "legitimateTotal": 4322,
+        "legitimateBlocked": 2203,
+        "attackBlockedRate": 0.5435041716328963,
+        "legitimateBlockedRate": 0.509717723276261,
+        "safetyScore": 0.26647046267702623,
+        "passesThresholds": false,
+        "evidenceId": "spike"
+      }
+    },
+    {
+      "shape": "cs-hosting-only",
+      "seed": 8,
+      "ms": 31238,
+      "responseKind": "ok",
+      "raw": "{\"rule\": {\"kind\": \"and\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"",
+      "validJson": false,
+      "status": "invalid-schema",
+      "text": null,
+      "diagnostics": [
+        "E_SCHEMA_NOT_JSON"
+      ],
+      "replay": null,
+      "baselineReplay": {
+        "attackTotal": 1730,
+        "attackBlocked": 957,
+        "legitimateTotal": 4270,
+        "legitimateBlocked": 2065,
+        "attackBlockedRate": 0.5531791907514451,
+        "legitimateBlockedRate": 0.48360655737704916,
+        "safetyScore": 0.28565810669951675,
+        "passesThresholds": false,
+        "evidenceId": "spike"
+      }
+    },
+    {
+      "shape": "cs-hosting-only",
+      "seed": 9,
+      "ms": 27755,
+      "responseKind": "ok",
+      "raw": "{\"rule\": {\"kind\": \"and\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"",
+      "validJson": false,
+      "status": "invalid-schema",
+      "text": null,
+      "diagnostics": [
+        "E_SCHEMA_NOT_JSON"
+      ],
+      "replay": null,
+      "baselineReplay": {
+        "attackTotal": 1725,
+        "attackBlocked": 932,
+        "legitimateTotal": 4275,
+        "legitimateBlocked": 2101,
+        "attackBlockedRate": 0.5402898550724637,
+        "legitimateBlockedRate": 0.49146198830409354,
+        "safetyScore": 0.2747579286380201,
+        "passesThresholds": false,
+        "evidenceId": "spike"
+      }
+    },
+    {
+      "shape": "cs-hosting-only",
+      "seed": 10,
+      "ms": 27527,
+      "responseKind": "ok",
+      "raw": "{\"rule\": {\"kind\": \"and\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"or\", \"left\": {\"kind\": \"",
+      "validJson": false,
+      "status": "invalid-schema",
+      "text": null,
+      "diagnostics": [
+        "E_SCHEMA_NOT_JSON"
+      ],
+      "replay": null,
+      "baselineReplay": {
+        "attackTotal": 1704,
+        "attackBlocked": 942,
+        "legitimateTotal": 4296,
+        "legitimateBlocked": 2117,
+        "attackBlockedRate": 0.5528169014084507,
+        "legitimateBlockedRate": 0.49278398510242083,
+        "safetyScore": 0.28039758570042234,
+        "passesThresholds": false,
+        "evidenceId": "spike"
+      }
+    }
+  ]
+}
