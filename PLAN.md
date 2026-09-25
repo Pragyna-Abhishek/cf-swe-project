@@ -1,0 +1,312 @@
+# Portcullis: build plan
+
+Phases are vertical slices. Each one ends with something that runs, not a layer that waits for the
+next layer. Read DESIGN.md first.
+
+Sizes are rough and relative: **S** is a few hours, **M** is about a day, **L** is two days or more.
+They are estimates, not measurements.
+
+Every phase lists acceptance criteria that can be checked without asking anyone. If a criterion
+cannot be verified by running something, it is not a criterion.
+
+## Testing setup, established in Phase 0 and used by every phase after
+
+Two test projects, because the constraints differ:
+
+1. **`test/unit`, plain Vitest, no Workers runtime.** Simulator, aggregator, printer, lexer, parser,
+   type checker, evaluator. These are pure functions over plain data. They need no platform and run
+   far faster outside the Workers pool. This is where most tests live.
+2. **`test/integration`, `@cloudflare/vitest-plugin`.** Agent, WebSocket, Workflow. Run with
+   `--max-workers=1 --no-isolate`, because WebSockets with Durable Objects are documented as
+   unsupported under per-file storage isolation.
+
+Coverage uses Istanbul. V8 coverage is documented as unsupported in the Workers pool.
+
+Workflow tests use the plugin's introspection API: `introspectWorkflow`,
+`introspectWorkflowInstance`, with `mockStepResult`, `mockStepError`, `forceStepTimeout`,
+`mockEvent`, `forceEventTimeout`, `disableSleeps`, `disableRetryDelays`. Introspectors are always
+disposed with `await using` or storage isolation leaks between tests.
+
+## Phase 0: spikes and measurements
+
+Size: **M**. Nothing architectural is committed until this phase answers its questions.
+
+This project targets Workers Free, which means a 10 ms CPU ceiling per request everywhere. Three
+numbers have to be measured before the design can be trusted, plus one model behavior.
+
+### 0.1 Is the model usable on this account
+
+Call `@cf/meta/llama-3.3-70b-instruct-fp8-fast` from a deployed Worker on the target account. Record
+whether it succeeds, and measure the actual rate limit by driving it until it returns 429.
+
+The docs say text generation is 300 requests per minute by default, but models requiring the Workers
+Paid plan get 20 per minute. Whether this model is in that category is UNVERIFIED and could not be
+read from the docs repository, because the model reference pages are generated from a separate data
+source.
+
+Fallback if it is unavailable or too limited: `@cf/meta/llama-3.1-8b-instruct` also supports JSON
+mode per the Workers AI docs, and the `ModelClient` interface makes the swap a one-line change. Record
+the decision and the reason.
+
+### 0.2 Does a Durable Object RPC call refresh the CPU budget
+
+Write a Durable Object method that burns CPU in a measured loop, call it repeatedly over RPC, and
+find where `exceededCpu` appears. Then repeat the same experiment over `fetch()` and over WebSocket
+messages.
+
+The docs say the budget is refreshed by "each incoming HTTP request or WebSocket message" and do not
+mention RPC. DESIGN.md section 5 depends on the answer. The chunk driver sits behind one interface so
+the answer changes one implementation, not the architecture.
+
+### 0.3 How many requests fit in 10 ms
+
+Build the columnar representation and a throwaway evaluator for a single comparison node. Measure:
+
+- requests generated per 10 ms slice
+- requests evaluated per 10 ms slice, for a trivial rule and for a rule with about ten nodes
+- cost of decoding one traffic blob out of SQLite
+
+Output is a chosen `Scenario.requestCount` with the measurement written next to it, and a chunk size
+set conservatively below the measured ceiling.
+
+If generation cannot be made to fit even when chunked, switch to build-time precomputation with a
+digest assertion, as described in DESIGN.md section 5.
+
+### 0.4 Structured output reliability for rule drafting
+
+The important spike. Ask the model for a `RuleAST` as JSON against a JSON Schema, using
+`response_format: { type: "json_schema", json_schema: ... }`, across at least 30 attempts spanning
+three scenario shapes. Record:
+
+- fraction that are valid JSON
+- fraction that satisfy the schema
+- fraction that also pass the type checker
+- how often Workers AI returns the documented `JSON Mode couldn't be met` error
+- which schema shapes fail most
+
+Note that JSON mode does not support streaming, per the docs, so this call can never be streamed.
+
+**Fallback plan, in order.** Each step is only taken if the previous one is measured to be
+insufficient:
+
+1. Flatten the schema. Nested recursive `RuleAST` unions are the most likely failure source. Try a
+   flat node-list encoding with integer parent references instead of nesting.
+2. Constrain harder. Replace open `string` value fields with enums drawn from the actual dictionary
+   for that scenario, so the model picks an existing path or ASN rather than inventing one.
+3. Two-call decomposition. First call picks the field and operator from enums; second call supplies
+   only the value. Each call has a trivial schema.
+4. Few-shot with three worked examples in the prompt.
+5. If structured output is still unreliable, fall back to a constrained template: the model selects
+   from a small set of parameterized rule shapes by index and supplies values. This preserves the
+   thesis, since the model still proposes and code still verifies, and it is worth reporting honestly
+   in the README as a measured finding rather than hidden.
+
+Acceptance criteria for Phase 0:
+
+- A `docs/spikes.md` exists recording all four measurements with dates and the account tier.
+- `Scenario.requestCount` and the chunk size are chosen, with the measurement cited.
+- The chunk transport (RPC, fetch, or WebSocket) is decided and recorded.
+- The model is chosen and recorded.
+- DESIGN.md section 5 and section 13 are updated so no measured item is still marked UNVERIFIED.
+
+Tests added: benchmark harness under `test/bench`, excluded from the normal test run.
+
+## Phase 1: thin end-to-end slice, deployed
+
+Size: **L**. This is the phase that de-risks everything. It goes all the way through and it ships.
+
+Deliberately thin. One scenario, a grammar of one field and one operator, no retry loop, no memory,
+no evidence ledger. The point is that every boundary in DESIGN.md is crossed once by real code
+running on Cloudflare.
+
+Scope:
+
+- Worker entrypoint with `routeAgentRequest()` and React UI served as static assets
+  (`assets.not_found_handling: "single-page-application"`).
+- `IncidentAgent` extending `Agent`, name-addressed, with SQLite schema for incidents, rule versions
+  and traffic. `@callable()` methods: `startInvestigation`, `approve`, `reject`.
+- Seeded simulator producing columnar traffic for **one** scenario, which is the credential stuffing
+  **trap** scenario. The trap is in Phase 1 and not later, because it is the thing that validates the
+  thesis, and building it last would mean discovering late that the loop does not actually change any
+  outcome.
+- Aggregator producing the seven breakdowns in a single pass.
+- Minimal grammar: `http.request.uri.path` and `ip.src.asnum`, operators `eq` and `in`, plus `and`.
+  Printer, lexer, parser, type checker, evaluator, and the round-trip assertion, all real, just
+  narrow.
+- One model call that emits `RuleAST` JSON. No retries yet: a failure fails the incident visibly.
+- Replay evaluator producing the four counts and the safety score.
+- `InvestigationWorkflow` with the steps from DESIGN.md section 8 that this slice needs, including
+  `waitForApproval`.
+- Approve and reject wired end to end, carrying a **rule version ID only**.
+- Naive baseline rule generated in code, shown beside the model's rule. No model needed, so it always
+  works.
+- Deployed to a `workers.dev` subdomain.
+
+Acceptance criteria:
+
+- The deployed URL loads and the traffic panel shows live data.
+- Typing a symptom starts a workflow and the step list updates over WebSocket without a reload.
+- A rule is drafted, rendered, parsed back, and the round-trip assertion passes.
+- Replay reports four counts and they are internally consistent: blocked never exceeds total.
+- The naive baseline rule blocks measurably more legitimate traffic than the model's rule on the trap
+  scenario, **or** this is recorded as a negative result in `docs/spikes.md`. Either outcome is
+  acceptable at this stage; an unexamined outcome is not.
+- Approve applies the rule and the traffic panel visibly recovers.
+- Reject leaves nothing applied.
+- Reloading the browser preserves incident history.
+- The 60 second demo script in DESIGN.md section 3 can be performed against the deployed URL.
+
+Tests added:
+
+- Unit: simulator determinism (same seed gives an identical digest), aggregator counts sum to total,
+  printer and parser round-trip on hand-written ASTs, evaluator against hand-checked expected counts.
+- Integration: agent state survives eviction (`await using` on the introspector), workflow reaches
+  `awaiting-approval`, `mockEvent` drives approval to completion, reject produces
+  `WorkflowRejectedError`.
+- Security: approving with a rule version ID that is not `Incident.proposedRuleVersionId` is
+  rejected. Applying without an approval row is rejected. These two tests exist from Phase 1 onward
+  and never get deleted.
+
+## Phase 2: the real parser and evaluator
+
+Size: **L**. The core of the project. Abhishek owns the grammar and must be able to explain every
+line.
+
+- Finalize the grammar from DESIGN.md section 7. Cut anything not defensible.
+- Full lexer with position tracking, so diagnostics carry byte spans.
+- Recursive descent parser with correct precedence: `lower()`, then `not`, then `and`, then `or`.
+- Type checker: string fields reject numeric literals and vice versa, `contains` rejects number
+  fields, `in` requires a homogeneous set, `lower()` rejects number fields.
+- Diagnostics with stable machine codes, useful messages, and spans.
+- Evaluator covering the whole grammar over columnar traffic, in integer space.
+- AST depth and node count caps, enforced before printing.
+
+Acceptance criteria:
+
+- Every grammar production has at least one positive and one negative test.
+- Every diagnostic code is produced by at least one test.
+- Property test: 1,000 generated ASTs all round-trip through printer and parser.
+- Property test: evaluator over columnar traffic agrees with a naive reference evaluator over decoded
+  `Request` objects, on generated rules and traffic. This is the real correctness argument for the
+  columnar optimization.
+- Precedence tests pin `a or b and c` and `not a and b` to the documented order.
+- Evaluator still fits the measured CPU budget at the full grammar. Re-measure; do not assume.
+
+Tests added: a large unit suite. This phase is mostly tests by volume.
+
+## Phase 3: retry loop and diagnostics feedback
+
+Size: **M**.
+
+- Bounded loop over steps 6, 7 and 8 from DESIGN.md section 8, with deterministic step names.
+- Diagnostics fed back into the drafting prompt.
+- `RuleVersion` rows recorded for every attempt including failures, with `rawModelOutput` kept.
+- Every failure class handled distinctly: `invalid-schema`, `invalid-types`, `roundtrip-failed`.
+  `roundtrip-failed` is a hard failure and never retried, because it is our bug.
+- UI shows the attempt history so a reviewer can see what was rejected and why.
+
+Acceptance criteria:
+
+- With a fake model scripted to fail twice then succeed, the incident completes on attempt 3 and all
+  three rule versions are persisted.
+- With a fake model that always fails, the incident reaches `failed` with three recorded attempts and
+  no rule proposed.
+- A forced printer bug makes the round-trip assertion fail loudly rather than retry.
+- Step names in a three-attempt run are exactly the deterministic names from DESIGN.md.
+
+Tests added: unit tests for the loop against the fake model; integration test using `mockStepError`
+to fail a validate step and confirm the retry policy behaves.
+
+## Phase 4: scenarios, evidence ledger, memory
+
+Size: **L**.
+
+- Grow to 8 to 12 scenarios across the three families, of which at least 3 are traps with different
+  `trapAttribute` values.
+- `Evidence` records created by every deterministic tool, with stable IDs.
+- Hypothesis must cite evidence IDs; citations to non-existent IDs are a detected failure.
+- UI makes every claim clickable through to its evidence.
+- Lessons persisted per incident and retrieved by scenario family in step 2.
+- Retention policy for `cf_agents_workflows`, since the SDK does not clean it up.
+
+Acceptance criteria:
+
+- Every scenario runs end to end and its threshold outcome is recorded.
+- Every claim shown in the UI resolves to an evidence record.
+- A hypothesis citing a fabricated evidence ID is caught and surfaced, not rendered.
+- Running the same scenario twice shows the prior lesson retrieved on the second run.
+- Workflow tracking rows older than the retention window are deleted.
+
+Tests added: one scenario-level test per scenario asserting its threshold outcome; evidence integrity
+tests; a memory retrieval test.
+
+## Phase 5: eval harness and ablations
+
+Size: **M**.
+
+- CLI harness running all scenarios and emitting a table of the metrics in DESIGN.md section 9.
+- Response cache keyed by hash of `(scenario, prompt, model)`, so ablations and re-runs are nearly
+  free and results are reproducible.
+- All four ablations from DESIGN.md section 9: no retry loop, no memory, naive baseline, text output
+  instead of AST.
+- Results committed as a checked-in report so the README can cite measured numbers.
+
+Acceptance criteria:
+
+- `npm run eval` produces the metrics table against the fake model with no credentials.
+- `npm run eval -- --real` produces it against Workers AI.
+- Re-running with a warm cache produces byte-identical results.
+- The naive baseline ablation shows the collateral damage gap on trap scenarios, or the absence of a
+  gap is reported.
+- The text-versus-AST ablation quantifies the syntax error rate the AST approach avoids.
+
+Tests added: a smoke test that the harness runs and the cache is honored.
+
+## Phase 6: failure injection and tracing
+
+Size: **M**. Mostly a matter of using the plugin's introspection API.
+
+- Failure injection tests: every step forced to error and to time out; approval forced to time out;
+  rejection path; model rate limiting.
+- Step timings and chunk counts recorded and surfaced.
+- Structured logging with the incident ID as a correlation key.
+
+Acceptance criteria:
+
+- Every step in DESIGN.md section 8 has a test that forces it to fail and asserts the incident ends
+  in a defined state, never a silent hang.
+- `forceEventTimeout` on the approval gate moves the incident to `timed-out` with nothing applied.
+- Step timings and chunk counts appear in the UI for a completed incident.
+
+Tests added: the failure injection suite.
+
+## Phase 7: UI polish, README, PROMPTS
+
+Size: **M**. Required for submission, so it is a phase and not an afterthought.
+
+- README with clear run instructions, the deployed demo link, the architecture summary, and measured
+  numbers from Phase 5 or an explicit statement that a number is not yet measured.
+- PROMPTS.md with the AI prompt history.
+- `prompts/` directory committed, holding every prompt template under version control.
+- UI: evidence drill-down, attempt history, before-and-after traffic panels, naive-versus-proposed
+  comparison.
+
+Acceptance criteria:
+
+- A reviewer can clone, install, and run locally by following the README with no other knowledge.
+- The deployed link works from a clean browser profile.
+- Every number in the README traces to a Phase 5 artifact or is marked as unmeasured.
+- PROMPTS.md and `prompts/` are present and current.
+- The 60 second demo script performs as written.
+
+## Sequencing notes
+
+- Phase 0 gates everything. Do not start Phase 1 before its four answers exist.
+- Phase 1 includes the trap scenario and the naive baseline. Neither is deferred, because together
+  they are the experiment that decides whether the project's thesis is demonstrable at all. Finding
+  out in Phase 4 would be too late to change course.
+- Phases 2 and 3 can overlap slightly, but the grammar should settle before the retry loop is tuned,
+  since the diagnostics are what the loop feeds back.
+- Tier 1 in the original scope is Phases 0 through 3. Tier 2 is Phases 4 through 6. Phase 7 is
+  required regardless of tier, so it is never traded away.
+- If time runs short, cut scenario count (Phase 4) and tracing (Phase 6) before cutting tests.
