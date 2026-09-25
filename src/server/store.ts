@@ -226,6 +226,26 @@ export function getRuleVersion(sql: SqlStorage, id: string): RuleVersion | null 
   };
 }
 
+/** Every model-drafted attempt for an incident, in attempt order. For the UI's attempt history. */
+export function listDraftAttempts(sql: SqlStorage, incidentId: string): RuleVersion[] {
+  return sql
+    .exec<RuleVersionRow>("SELECT * FROM rule_versions WHERE incident_id = ? AND source = 'model' ORDER BY attempt ASC", incidentId)
+    .toArray()
+    .map((r) => ({
+      id: r.id,
+      incidentId: r.incident_id,
+      source: "model" as const,
+      attempt: r.attempt,
+      status: r.status as RuleVersion["status"],
+      rawModelOutput: r.raw_model_output,
+      ast: r.ast ? (JSON.parse(r.ast) as RuleAST) : null,
+      text: r.text,
+      replay: r.replay ? (JSON.parse(r.replay) as ReplayResult) : null,
+      diagnostics: JSON.parse(r.diagnostics) as Diagnostic[],
+      createdAt: r.created_at,
+    }));
+}
+
 // ---------------------------------------------------------------------------
 // Approvals (append only)
 // ---------------------------------------------------------------------------

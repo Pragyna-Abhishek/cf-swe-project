@@ -12,6 +12,8 @@ export type IncidentView = Incident & {
   proposed: RuleVersion | null;
   baseline: RuleVersion | null;
   applied: RuleVersion | null;
+  /** Every model-drafted attempt, in attempt order, including failed ones. Phase 3 retry loop. */
+  attempts: RuleVersion[];
   /** Blocked requests per [bucket][statusClass] for each replayed rule, for the traffic panel. */
   blockedPanels: { proposed: number[][] | null; baseline: number[][] | null };
   /** Summary the rule was drafted from, for the evidence panel. */

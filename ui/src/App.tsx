@@ -240,6 +240,7 @@ function IncidentPanel({
         <RuleCard title="Proposed rule (model draft, verified in code)" version={incident.proposed} thresholds={thresholds} />
         <RuleCard title="Naive baseline (block the top source attribute)" version={incident.baseline} thresholds={thresholds} />
       </div>
+      {incident.attempts.length > 1 && <AttemptHistory attempts={incident.attempts} />}
       {awaiting && (
         <div className="decision">
           <button className="approve" onClick={onApprove}>
@@ -273,6 +274,25 @@ function Steps({ incident }: { incident: IncidentView }) {
         </li>
       ))}
     </ol>
+  );
+}
+
+/** Every draft attempt, so a reviewer can see what was rejected and why (Phase 3). */
+function AttemptHistory({ attempts }: { attempts: RuleVersion[] }) {
+  return (
+    <details className="attempt-history">
+      <summary>Attempt history ({attempts.length} attempt{attempts.length === 1 ? "" : "s"})</summary>
+      <ol>
+        {attempts.map((a) => (
+          <li key={a.id} className={`status status-${a.status}`}>
+            <span className="step-name">attempt {a.attempt}</span>
+            <span className="step-status">{a.status}</span>
+            {a.text && <pre className="rule-text">{a.text}</pre>}
+            {a.diagnostics.length > 0 && <Diagnostics text={a.text} diagnostics={a.diagnostics} />}
+          </li>
+        ))}
+      </ol>
+    </details>
   );
 }
 

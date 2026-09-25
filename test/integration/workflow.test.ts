@@ -116,6 +116,90 @@ describe("investigation workflow, end to end with the fake model", () => {
   });
 });
 
+describe("the bounded draft retry loop (Phase 3)", () => {
+  it("a draft scripted to fail validation twice then succeed completes on attempt 3, with all three attempts persisted", async () => {
+    const agent = await agentNamed("wf-retry-succeed");
+    await using introspector = await introspectWorkflow(env.INVESTIGATION_WORKFLOW);
+    await introspector.modifyAll(async (m) => {
+      await m.disableRetryDelays();
+      await m.mockStepResult({ name: "validate-rule-attempt-1" }, { status: "invalid-schema", diagnosticCodes: ["E_SCHEMA_INVALID"] });
+      await m.mockStepResult({ name: "validate-rule-attempt-2" }, { status: "invalid-types", diagnosticCodes: ["E_TYPE_MISMATCH"] });
+      // attempt 3 is not mocked: it runs for real, against the canned fake model, and succeeds.
+    });
+    const { incidentId } = await agent.startInvestigation(SYMPTOM);
+    const done = await waitForIncident(agent, incidentId, ["awaiting-approval", "failed"]);
+    expect(done.status).toBe("awaiting-approval");
+    expect(done.proposedRuleVersionId).toBe(`rv_${incidentId}_3`);
+
+    const state = await agent.state;
+    const view = state.incidents.find((i) => i.id === incidentId);
+    expect(view?.attempts.map((a) => a.attempt)).toEqual([1, 2, 3]);
+    expect(view?.attempts.map((a) => a.id)).toEqual([`rv_${incidentId}_1`, `rv_${incidentId}_2`, `rv_${incidentId}_3`]);
+    // validate-rule-attempt-1 and -2 are mocked: mockStepResult replaces the step's execution
+    // entirely, so tracked()'s own recordStep call never runs for those two. Attempt 3 runs for
+    // real, unmocked, and is recorded normally.
+    const stepNames = view?.steps.map((s) => s.name) ?? [];
+    expect(stepNames).toEqual(
+      expect.arrayContaining([
+        "draft-rule-attempt-1",
+        "draft-feedback-attempt-1",
+        "draft-rule-attempt-2",
+        "draft-feedback-attempt-2",
+        "draft-rule-attempt-3",
+        "validate-rule-attempt-3",
+        "replay-rule-attempt-3",
+      ]),
+    );
+    // No feedback step after the final attempt: there is no next attempt to feed it into.
+    expect(stepNames).not.toContain("draft-feedback-attempt-3");
+  });
+
+  it("a draft that always fails validation exhausts all attempts and fails the incident with no rule proposed", async () => {
+    const agent = await agentNamed("wf-retry-exhausted");
+    await using introspector = await introspectWorkflow(env.INVESTIGATION_WORKFLOW);
+    await introspector.modifyAll(async (m) => {
+      await m.disableRetryDelays();
+      for (const i of [1, 2, 3]) {
+        await m.mockStepResult({ name: `validate-rule-attempt-${i}` }, { status: "invalid-schema", diagnosticCodes: ["E_SCHEMA_NOT_JSON"] });
+      }
+    });
+    const { incidentId } = await agent.startInvestigation(SYMPTOM);
+    const done = await waitForIncident(agent, incidentId, ["failed", "awaiting-approval"]);
+    expect(done.status).toBe("failed");
+    expect(done.proposedRuleVersionId).toBeNull();
+    expect(done.failureReason).toMatch(/invalid-schema/);
+
+    const state = await agent.state;
+    const view = state.incidents.find((i) => i.id === incidentId);
+    expect(view?.attempts.map((a) => a.attempt)).toEqual([1, 2, 3]);
+    const stepNames = view?.steps.map((s) => s.name) ?? [];
+    expect(stepNames).toContain("draft-rule-attempt-3");
+    expect(stepNames).not.toContain("draft-rule-attempt-4");
+    // No feedback step after the last attempt: the loop is over, not waiting on a fourth attempt.
+    expect(stepNames).not.toContain("draft-feedback-attempt-3");
+  });
+
+  it("a roundtrip failure is a hard failure: it fails the incident on attempt 1, never retried", async () => {
+    const agent = await agentNamed("wf-retry-hardfail");
+    await using introspector = await introspectWorkflow(env.INVESTIGATION_WORKFLOW);
+    await introspector.modifyAll(async (m) => {
+      await m.disableRetryDelays();
+      await m.mockStepResult({ name: "validate-rule-attempt-1" }, { status: "roundtrip-failed", diagnosticCodes: ["E_ROUNDTRIP_MISMATCH"] });
+    });
+    const { incidentId } = await agent.startInvestigation(SYMPTOM);
+    const done = await waitForIncident(agent, incidentId, ["failed", "awaiting-approval"]);
+    expect(done.status).toBe("failed");
+    expect(done.failureReason).toMatch(/roundtrip-failed/);
+
+    const state = await agent.state;
+    const view = state.incidents.find((i) => i.id === incidentId);
+    expect(view?.attempts.map((a) => a.attempt)).toEqual([1]);
+    const stepNames = view?.steps.map((s) => s.name) ?? [];
+    expect(stepNames).not.toContain("draft-rule-attempt-2");
+    expect(stepNames).not.toContain("draft-feedback-attempt-1");
+  });
+});
+
 describe("input validation at the edge", () => {
   it("rejects an oversized or empty symptom", async () => {
     const agent = await agentNamed("edge");

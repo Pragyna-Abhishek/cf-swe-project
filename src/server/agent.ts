@@ -20,7 +20,7 @@ import { checkRuleText, modelFailureOutcome, verifyAst, verifyModelDraft } from 
 import { checkSymptom } from "../core/sanitize";
 import { SCENARIOS, type ScenarioDefinition } from "../core/scenarios";
 import { compileScenario, generateRange } from "../core/simulator";
-import type { Incident, IncidentStatus, ReplayResult, RuleVersion, TrafficSummary } from "../core/types";
+import type { Diagnostic, Incident, IncidentStatus, ReplayResult, RuleVersion, TrafficSummary } from "../core/types";
 import type { ModelResponse } from "../model/client";
 import * as store from "./store";
 import type { AgentState, IncidentView, InvestigationParams, StepStatus, TrafficState } from "./views";
@@ -318,6 +318,12 @@ export class IncidentAgent extends Agent<Env, AgentState> {
     return { status: updated.status, diagnosticCodes: updated.diagnostics.map((d) => d.code) };
   }
 
+  /** What a failed attempt looked like, for the retry prompt. Phase 3. */
+  draftFeedback(id: string): { raw: string; diagnostics: Diagnostic[] } {
+    const v = this.versionOrThrow(id);
+    return { raw: v.rawModelOutput, diagnostics: v.diagnostics };
+  }
+
   /** The naive single attribute rule, generated in code from the label-blind summary. */
   createBaselineVersion(incidentId: string): string | null {
     const id = `rv_${incidentId}_baseline`;
@@ -534,6 +540,7 @@ export class IncidentAgent extends Agent<Env, AgentState> {
         proposed: store.getRuleVersion(this.db, proposedId),
         baseline: store.getRuleVersion(this.db, `rv_${i.id}_baseline`),
         applied: i.appliedRuleVersionId ? store.getRuleVersion(this.db, i.appliedRuleVersionId) : null,
+        attempts: store.listDraftAttempts(this.db, i.id),
         blockedPanels: {
           proposed: store.getPanel(this.db, proposedId),
           baseline: store.getPanel(this.db, `rv_${i.id}_baseline`),

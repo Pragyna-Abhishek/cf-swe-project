@@ -697,18 +697,18 @@ params or step returns, which keeps both under the 1 MiB ceilings.
 Idempotency keys are the step names, since Workflows caches step results by name and step names
 must be deterministic. All names are constants in `src/server/workflow.ts`.
 
-### As built in Phase 1
+### As built (Phase 1, retry loop added in Phase 3)
 
-Phase 1 runs one draft attempt; a failed draft fails the incident visibly. Hypothesis, memory and
-report steps (2, 3, 5, 13) are later phases.
+Hypothesis, memory and report steps (2, 3, 5, 13) are later phases, not built yet.
 
 | # | Step | Does | Returns | Retry policy |
 | --- | --- | --- | --- | --- |
 | 1 | `ensure-traffic` | Calls `ensureTrafficChunk` once per chunk (idempotent), then `trafficDigest` | digest, count, chunks | 3, 2 s, exponential |
 | 4 | `aggregate-traffic` | Merges the stored per-chunk partial aggregates into a `TrafficSummary` | `TrafficSummary` | 3, 2 s, exponential |
-| 6.1 | `draft-rule-attempt-1` | Builds the prompt from `prompts/`, calls the model, stores the raw output verbatim | rule version ID | 2, 5 s, exponential |
-| 7.1 | `validate-rule-attempt-1` | Runs the verification pipeline over the stored raw output | status, diagnostic codes | 3, 1 s, exponential |
-| 8.1 | `replay-rule-attempt-1` | Replays each chunk through the stored rule, merges the counts | `ReplayResult` | 3, 2 s, exponential |
+| 6.i | `draft-rule-attempt-{i}` | Builds the prompt (plus the previous attempt's raw output and diagnostics, for `i > 1`), calls the model, stores the raw output verbatim | rule version ID | 2, 5 s, exponential |
+| 7.i | `validate-rule-attempt-{i}` | Runs the verification pipeline over the stored raw output | status, diagnostic codes | 3, 1 s, exponential |
+| 6.5.i | `draft-feedback-attempt-{i}` | Only when attempt `i` failed and `i < MAX_DRAFT_ATTEMPTS`: reads back that attempt's raw output and diagnostics for the next prompt | raw output, diagnostics | 3, 1 s, exponential |
+| 8.i | `replay-rule-attempt-{i}` | Replays each chunk through the stored rule of the attempt the loop stopped on, merges the counts | `ReplayResult` | 3, 2 s, exponential |
 | 8b | `naive-baseline` | Builds the naive rule in code from the summary, verifies it the same way | rule version ID | 3, 1 s, exponential |
 | 8c | `replay-naive-baseline` | Same replay loop for the baseline | `ReplayResult` | 3, 2 s, exponential |
 | 9 | `publish-proposal` | Incident to `awaiting-approval` with `proposedRuleVersionId` set | status | 3, 1 s, exponential |
@@ -717,8 +717,21 @@ report steps (2, 3, 5, 13) are later phases.
 | 12 | `verify-recovery` | Re-parses the applied rule **from its stored text** and replays it | recovery `ReplayResult` | 3, 2 s, exponential |
 | 14 | `persist-incident` | Incident to `applied` with the recovery stored | digest | 3, 1 s, exponential |
 
-If validation fails, a `fail-incident` step marks the incident `failed` with the diagnostic codes
-and the workflow ends. If the approval times out, `mark-timed-out` marks it `timed-out`.
+**The retry loop (`src/server/workflow.ts`).** `i` runs from 1 to `MAX_DRAFT_ATTEMPTS` (3), a
+constant; the loop bound is never derived from model output (CLAUDE.md invariant 12). It exits as
+soon as attempt `i`'s validation status is `valid`, or is `roundtrip-failed` (our bug, never worth
+retrying: DESIGN deliberately does not retry a printer/parser disagreement). `invalid-schema` and
+`invalid-types` retry, feeding the failed attempt's raw output and diagnostics into the next
+attempt's prompt. If every attempt is exhausted without reaching `valid`, or the loop stopped on
+`roundtrip-failed`, `fail-incident` marks the incident `failed` with the last attempt's diagnostic
+codes and the workflow ends; every attempt made is still persisted as its own `RuleVersion` row
+(`attempt` 1..i), visible in the UI's attempt history. **Correction from the original plan:** the
+loop's exit condition here is validation status alone, not "reaches status `valid` **and** clears
+the scenario thresholds" as an earlier draft of this section said. A syntactically and type-valid
+rule that does not clear the thresholds is still proposed to the operator (as Phase 1 already did)
+rather than silently retried or discarded; PLAN.md's three named failure classes
+(`invalid-schema`/`invalid-types`/`roundtrip-failed`) are what the loop retries on, and threshold
+clearance was never one of them. If the approval times out, `mark-timed-out` marks it `timed-out`.
 
 Two corrections to the original plan, both from the docs and the SDK source:
 
@@ -733,19 +746,14 @@ Two corrections to the original plan, both from the docs and the SDK source:
 Step progress for the UI is written from inside each step's callback, so a replayed (cached) step
 does not report itself again.
 
-### Planned for Phase 3 onward
+### Planned for Phase 4 onward
 
 | # | Step | Input | Output | Retry policy | Idempotency key |
 | --- | --- | --- | --- | --- | --- |
 | 2 | `load-memory` | scenarioId family | prior lessons, evidence IDs | 3, 1 s, exponential | `load-memory` |
 | 3 | `classify-symptom` | symptom, signals | intent enum | 2, 5 s, exponential | `classify-symptom` |
 | 5 | `hypothesize` | summary, memory | hypothesis + cited evidence IDs | 2, 5 s, exponential | `hypothesize` |
-| 6.i, 7.i, 8.i | `draft-rule-attempt-{i}` and friends | as above, plus prior diagnostics | as above | as above | name with `i` |
 | 13 | `write-report` | everything above | report + lesson | 2, 5 s, exponential | `write-report` |
-
-Steps 6, 7 and 8 become the bounded retry loop. `i` runs from 1 to `MAX_DRAFT_ATTEMPTS` (3). The
-loop bound is a constant, so step names stay deterministic. The loop exits early on the first rule
-version that reaches status `valid` and clears the scenario thresholds.
 
 Steps 1, 4, 8 and 12 are the CPU-heavy ones. Each drives its work as a sequence of chunk calls into
 the Agent (step 4 merges partials stored at generation time, so its per-call work is small).

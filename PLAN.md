@@ -13,10 +13,11 @@ cannot be verified by running something, it is not a criterion.
 
 | Phase | State | What is left |
 | --- | --- | --- |
-| 0 | All four spikes measured (`docs/spikes.md`); 0.4 measured **negative** | 0.4's structured-output approach fails on the account (0/30 valid JSON). Implement and re-measure PLAN.md's fallback list, starting with flattening the `RuleAST` schema |
-| 1 | Built, tested locally, deployed | `https://portcullis.pragyna-portcullis.workers.dev` is live and serving. The 60-second demo has not yet been driven against the deployed URL in a browser. The model's rule step will fail visibly on this account until 0.4's fallback is built (0.4 measured, see Phase 0) |
+| 0 | All four spikes measured (`docs/spikes.md`); 0.4 measured **negative**, two fallbacks attempted | Fallback 1 (flatten the schema) measured, still fails. Fallback 2 (split leaf kinds by value type) implemented and unit-tested, **not yet re-measured**: the account's daily free neuron allocation was exhausted verifying fallback 1. Re-run `structured` once it resets |
+| 1 | Built, tested locally, deployed | `https://portcullis.pragyna-portcullis.workers.dev` is live and serving. The 60-second demo has not yet been driven against the deployed URL in a browser. The model's rule step is expected to keep failing visibly on this account until 0.4's fallback 2 is re-measured and confirmed (see Phase 0) |
 | 2 | Built, tested | Abhishek to review the grammar in DESIGN.md section 7 |
-| 3 to 7 | Not started | |
+| 3 | Built, tested (fake model only; not yet exercised against the real model, see Phase 0) | Bounded retry loop, diagnostics feedback, attempt history all implemented (`src/server/workflow.ts`, `src/core/prompt.ts`). Real-model behavior under retry is unverified until 0.4 is resolved |
+| 4 to 7 | Not started | |
 
 Deviations from this plan, on purpose:
 
