@@ -1,0 +1,27 @@
+{
+  "measuredAt": "2026-09-25T21:58:22.603Z",
+  "max": 400,
+  "elapsedMs": 26109,
+  "firstLimitedAt": null,
+  "counts": {
+    "ok": 400
+  },
+  "sample": [
+    {
+      "i": 0,
+      "kind": "ok",
+      "ms": 258
+    },
+    {
+      "i": 1,
+      "kind": "ok",
+      "ms": 497
+    },
+    {
+      "i": 2,
+      "kind": "ok",
+      "ms": 292
+    }
+  ],
+  "errors": []
+}
