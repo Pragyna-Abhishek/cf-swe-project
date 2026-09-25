@@ -1,5 +1,6 @@
 // Fake ModelClient for tests, local development without credentials, and the eval harness.
 
+import { encodeRuleAst } from "../core/rules/schema";
 import type { RuleAST } from "../core/types";
 import type { ModelClient, ModelRequest, ModelResponse } from "./client";
 
@@ -40,5 +41,5 @@ export const CANNED_RULE: RuleAST = {
 };
 
 export function cannedModel(): FakeModelClient {
-  return new FakeModelClient([JSON.stringify({ rule: CANNED_RULE })], "fake");
+  return new FakeModelClient([JSON.stringify({ rule: encodeRuleAst(CANNED_RULE) })], "fake");
 }

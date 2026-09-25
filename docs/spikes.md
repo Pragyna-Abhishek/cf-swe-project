@@ -18,7 +18,7 @@ unchanged, measured locally.
 | 0.1 Model usable on the account, and its rate limit | MEASURED on account, 2026-09-25 | Keep `@cf/meta/llama-3.3-70b-instruct-fp8-fast`. No fallback needed |
 | 0.2 Does a Durable Object RPC call refresh the CPU budget | MEASURED on account, 2026-09-25 (partial, see below) | Keep RPC; no failure was found to force a change |
 | 0.3 How many requests fit in 10 ms | MEASURED locally, 2026-09-25 | `CHUNK_SIZE = 500`, `requestCount = 6000` |
-| 0.4 Structured output reliability | MEASURED on account, 2026-09-25 — **fails** | AST JSON with a nested JSON Schema is not usable as designed. Fallback needed; not yet built. See below |
+| 0.4 Structured output reliability | MEASURED on account, 2026-09-25 — **fails**; fallback 1 (flat schema) also measured, still fails; fallback 2 (type-split leaf kinds) implemented but NOT yet re-measured, account daily neuron quota exhausted | Flat, type-split node-list JSON Schema (`RULE_JSON_SCHEMA`), no `$ref` recursion and no union-typed fields. See below |
 
 ## 0.3 CPU per chunk
 
@@ -203,14 +203,64 @@ currently designed and prompted, is not usable with this model at this schema.**
 negative result, recorded rather than hidden per CLAUDE.md's "never report an unmeasured number" and
 the parallel rule against skipping inconvenient findings.
 
-**Not yet done:** implementing and re-measuring against PLAN.md's ordered fallback list (1. flatten
-the schema to a node-list with integer parent references, which is the most likely fix given the
-failure mode measured here; 2. constrain harder with enums; 3. two-call decomposition; 4. few-shot
-examples; 5. constrained template selection). This is real design and prompt-engineering work, not a
-one-line change, and is left as the next Phase 0 step rather than done silently alongside a deploy
-task. Until a fallback is measured to work, Phase 1's model-drafted rule step will fail visibly on
-this account, which is the designed behavior for an unhandled model failure (DESIGN.md section 10),
-just not the intended common case.
+### Fallback 1, flattening the schema: implemented, measured, not sufficient alone
+
+Replaced the nested `$ref` schema with a flat node list (`{"root": ID, "nodes": [{"id", "kind", ...},
+...]}`), children referenced by integer id, capped at `maxItems: 64`. `src/core/rules/schema.ts`,
+`RULE_JSON_SCHEMA`; decoder rewritten to resolve ids with an explicit depth guard (`maxDepth`, still
+32) *and* a separate expansion-budget guard (`maxNodes`, 64) — a node referenced by two parents
+expands at each reference, so depth alone does not bound total work; a small node list could still
+blow up combinatorially within the depth cap. `prompts/draft-rule.system.txt` and
+`draft-rule.user.txt` updated to describe the flat format. Full unit test coverage in
+`test/unit/rules/schema.test.ts`, including the reused-reference case.
+
+Re-ran the structured spike (30 attempts) against the account with the flat schema alone:
+**still fails.** `docs/spike-results/0.4-structured.json` (overwritten with this run):
+
+| Metric | Result |
+| --- | --- |
+| Valid JSON | 2/30 |
+| Schema-valid | 0/30 |
+| Other errors (rate-limited from the earlier back-to-back spike runs) | 18/30 |
+
+Flattening alone did not fix the underlying problem; it changed its shape. A follow-up single-call
+probe with `max_tokens` raised from 1024 to 4096 (temporarily, on the spike Worker only, to see the
+model's output past the previous truncation point) showed why: **the model built a perfect binary
+tree of exactly 64 `"and"`/`"or"` nodes and zero leaf conditions**, every leaf-shaped reference
+pointing past the end of the array (ids up to 128 against a 64-entry list). This is a genuine model
+pathology, not an artifact of either encoding: without a recursion depth to run away in, the model
+instead ran away in sibling count, building out logical connectives it never resolved into an actual
+condition, until it exactly filled the array-length cap with nothing but `and`/`or`.
+
+### Fallback 2, splitting leaf kinds by value type: implemented, not yet re-measured (quota exhausted)
+
+Hypothesis: the leaf kinds' `value: ["string", "integer"]` union type is the reason the model avoids
+them. Workers AI's constrained JSON-mode decoder may handle a union-typed field poorly compared to
+the plain-integer `left`/`right`/`operand` fields on `"and"`/`"or"`/`"not"`, making the connective
+kinds structurally "easier" to keep emitting.
+
+Implemented: `"compare"` and `"in"` split at the wire level into `"compareString"`/`"compareNumber"`
+and `"inStrings"`/`"inNumbers"`, each with a single-typed `value`/`values` and a field enum
+restricted to that type's fields. No union types remain anywhere in `RULE_JSON_SCHEMA` (asserted by a
+test). The internal `RuleAST` type is unchanged; `encodeRuleAst` picks the wire kind from the
+literal's JS type, `decodeRuleAst` maps back. `prompts/` updated to match. Full unit coverage in
+`test/unit/rules/schema.test.ts`.
+
+**This has not been re-measured against the account.** Testing fallback 1 and probing the failure
+mode (including the `max_tokens: 4096` probe above) spent the account's entire 10,000/day free
+neuron allocation; the account started returning error `3036`/`4006` ("used up your daily free
+allocation") partway through verification. Per CLAUDE.md, this is reported as NOT MEASURED rather
+than assumed to work: the type-split schema is a reasoned, tested-at-the-decoder-level fix for a
+real measured pathology, not yet confirmed to change the model's behavior. **Re-run
+`node scripts/run-spikes.mjs <url> structured 10` once the daily allocation resets (or on a Paid
+account) and update this section with the result before treating 0.4 as resolved.** Until then,
+Phase 1's model-drafted rule step is expected to keep failing visibly on this account, which is the
+designed behavior for an unhandled model failure (DESIGN.md section 10), just not the intended common
+case.
+
+If the type split is also insufficient once re-measured, the next fallback in PLAN.md's ordered list
+is two-call decomposition (one call picks field/operator from enums, a second supplies only the
+value), then few-shot examples, then constrained template selection as the final fallback.
 
 ## Measured on the simulator: the trap works
 

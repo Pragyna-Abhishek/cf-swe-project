@@ -8,4 +8,4 @@ Aggregated traffic summary. Each breakdown lists the most common values for one 
 {{summary}}
 </traffic_summary>
 
-Propose one rule as {"rule": NODE}.
+Propose one rule as {"rule": {"root": ID, "nodes": [...]}}.

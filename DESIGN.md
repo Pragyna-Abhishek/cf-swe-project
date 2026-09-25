@@ -964,14 +964,20 @@ Explicitly out of scope. Listed so that the absence of each is a decision rather
    (docs/spikes.md, 0.2): no single RPC call triggered `exceededCpu` up to 512,000,000 loop
    iterations. Kept RPC for the chunk loops; the deeper question of whether this account enforces
    the 10 ms budget at all on this call path stays open, see docs/spikes.md 0.2.
-3. **Structured output reliability for rule drafting. MEASURED and failing** (docs/spikes.md, 0.4):
-   0/30 attempts against the real model produced valid JSON. The model runs away into an unboundedly
-   deep nested `"or"` chain and gets truncated by `max_tokens` before closing. The AST-as-nested-
-   JSON-Schema encoding is not usable as designed with this model. **Not yet done:** implement and
-   re-measure PLAN.md's ordered fallback list, starting with flattening the schema to a node-list
-   with integer parent references (the most likely fix given the measured failure mode). Until this
-   is fixed, the model-drafted-rule step of the Phase 1 demo fails visibly rather than producing a
-   rule.
+3. **Structured output reliability for rule drafting. MEASURED and failing; fallback in progress**
+   (docs/spikes.md, 0.4). The original nested-`$ref` AST-as-JSON-Schema encoding: 0/30 attempts
+   produced valid JSON, running away into an unboundedly deep nested `"or"` chain. Fallback 1
+   (flatten the schema to a node list with integer id references, `RULE_JSON_SCHEMA` in
+   `src/core/rules/schema.ts`) is implemented and was re-measured: still fails, 0/30 schema-valid,
+   because the model just ran away in sibling count instead of depth, building a 64-node tree of
+   pure `and`/`or` with zero leaf conditions. Fallback 2 (split leaf kinds by value type —
+   `compareString`/`compareNumber`, `inStrings`/`inNumbers` — removing every union-typed field from
+   the schema) is implemented and unit-tested but **not yet re-measured against the account**: the
+   account's 10,000/day free neuron allocation was exhausted measuring fallback 1 and diagnosing the
+   failure mode. Re-run `node scripts/run-spikes.mjs <url> structured 10` once the allocation resets
+   and update docs/spikes.md before treating this as resolved. Until it is, the model-drafted-rule
+   step of the Phase 1 demo fails visibly rather than producing a rule, which is the designed
+   behavior for an unhandled model failure (section 10), just not the intended common case.
 4. ~~Measured requests-per-10 ms~~. Closed: `CHUNK_SIZE = 500`, `requestCount = 6000`, measured
    locally (docs/spikes.md, 0.3). Re-check `exceededCpu` on the account.
 5. Grammar. Implemented as section 7 describes; Abhishek to review and own it.
