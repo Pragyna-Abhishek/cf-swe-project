@@ -34,3 +34,16 @@ export const WRITE_REPORT_JSON_SCHEMA = {
 export function isClassifyIntent(v: unknown): v is ClassifyIntent {
   return CLASSIFY_INTENTS.includes(v as ClassifyIntent);
 }
+
+/**
+ * Phase 5, ablation 4: ask the model for the rule as literal Rules-language text instead of the
+ * flat AST wire format, and parse it with the real parser (src/core/rules/pipeline.ts,
+ * checkRuleText). Flat like the schemas above, so it carries none of 0.4's nesting risk; what it
+ * measures is the syntax error rate of free-form text versus structured output, not schema risk.
+ */
+export const TEXT_RULE_JSON_SCHEMA = {
+  type: "object",
+  properties: { rule: { type: "string" } },
+  required: ["rule"],
+  additionalProperties: false,
+} as const;

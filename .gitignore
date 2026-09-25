@@ -5,3 +5,4 @@ coverage/
 .dev.vars
 *.log
 worker-configuration.d.ts.bak
+.eval-cache/

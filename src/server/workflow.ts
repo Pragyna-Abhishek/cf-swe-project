@@ -15,7 +15,7 @@ import { AgentWorkflow, WorkflowRejectedError, type AgentWorkflowEvent, type Age
 import { NonRetryableError } from "cloudflare:workflows";
 import { planChunks } from "../core/chunks";
 import { CLASSIFY_JSON_SCHEMA, HYPOTHESIZE_JSON_SCHEMA, WRITE_REPORT_JSON_SCHEMA } from "../core/narrative-schema";
-import { buildClassifyPrompt, buildDraftRulePrompt, buildHypothesizePrompt, buildReportPrompt, type PriorAttempt } from "../core/prompt";
+import { buildClassifyPrompt, buildDraftRulePrompt, buildHypothesizePrompt, buildReportPrompt, MAX_DRAFT_ATTEMPTS, type PriorAttempt } from "../core/prompt";
 import { toReplayResult } from "../core/replay";
 import { mergeChunkReplays, type ChunkReplay } from "../core/rules/evaluate";
 import { RULE_JSON_SCHEMA } from "../core/rules/schema";
@@ -25,9 +25,6 @@ import type { IncidentAgent } from "./agent";
 import { modelFor } from "./model";
 import { CLASSIFY_SYMPTOM_TEMPLATES, DRAFT_RULE_TEMPLATES, HYPOTHESIZE_TEMPLATES, WRITE_REPORT_TEMPLATES } from "./prompts";
 import type { InvestigationParams } from "./views";
-
-/** DESIGN.md section 8: "i runs from 1 to MAX_DRAFT_ATTEMPTS (3)." A constant, never model output. */
-export const MAX_DRAFT_ATTEMPTS = 3;
 
 export const STEP = {
   ensureTraffic: "ensure-traffic",

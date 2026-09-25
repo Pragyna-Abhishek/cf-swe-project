@@ -868,7 +868,12 @@ require the Workers Paid plan. Measured on the account (docs/spikes.md, 0.1):
 ~15.3 req/s sustained, well above the 20/min figure for the Paid-only tier and consistent with the
 300/min default tier. The exact ceiling was not found (the spike never triggered a 429).
 
-**No metric in this document has been measured.** Every number here is a placeholder or a threshold.
+**No metric in this document has been measured against the real model.** Every number here is a
+placeholder or a threshold. The harness described above is built and has been run end to end
+against the fake model (`docs/eval-results/fake.json`), which validates the harness and the
+ablations mechanically but is not evaluation signal about the model: the fake model returns one
+fixed rule regardless of input. A real run (`npm run eval -- --real`) is blocked on the account's
+Workers AI daily neuron quota, exhausted as of this writing (docs/spikes.md, docs/eval-results/README.md).
 The README will carry measured numbers or state that none exist yet.
 
 ## 10. Failure modes

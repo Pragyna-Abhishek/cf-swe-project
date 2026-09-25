@@ -1,5 +1,6 @@
 // Fake ModelClient for tests, local development without credentials, and the eval harness.
 
+import { print } from "../core/rules/printer";
 import { encodeRuleAst } from "../core/rules/schema";
 import type { RuleAST } from "../core/types";
 import type { ModelClient, ModelRequest, ModelResponse } from "./client";
@@ -47,6 +48,8 @@ export function cannedModel(): FakeModelClient {
     switch (request.purpose) {
       case "draft-rule":
         return { kind: "ok", raw: JSON.stringify({ rule: encodeRuleAst(CANNED_RULE) }) };
+      case "draft-rule-text":
+        return { kind: "ok", raw: JSON.stringify({ rule: print(CANNED_RULE).text }) };
       case "classify-symptom":
         return { kind: "ok", raw: JSON.stringify({ intent: "credential-stuffing" }) };
       case "hypothesize":

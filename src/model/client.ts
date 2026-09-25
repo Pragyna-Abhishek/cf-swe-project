@@ -5,7 +5,7 @@ import type { Prompt } from "../core/prompt";
 
 export type ModelRequest = Prompt & {
   /** What the call is for. Used for logging and for the eval cache key. */
-  purpose: "draft-rule" | "classify-symptom" | "hypothesize" | "write-report";
+  purpose: "draft-rule" | "draft-rule-text" | "classify-symptom" | "hypothesize" | "write-report";
   jsonSchema: object;
 };
 

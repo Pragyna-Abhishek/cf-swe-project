@@ -8,6 +8,13 @@ import type { Breakdown, Diagnostic, TrafficSummary } from "./types";
 /** What a rejected attempt looked like, fed back into the next attempt's prompt. Phase 3. */
 export type PriorAttempt = { raw: string; diagnostics: Diagnostic[] };
 
+/**
+ * DESIGN.md section 8: "i runs from 1 to MAX_DRAFT_ATTEMPTS (3)." A constant, never model
+ * output. Lives here (not src/server/workflow.ts) so the Phase 5 eval harness can import it
+ * without pulling in the Workflow's platform-specific SDK imports.
+ */
+export const MAX_DRAFT_ATTEMPTS = 3;
+
 export type PromptTemplates = { system: string; user: string };
 export type Prompt = { system: string; user: string };
 
