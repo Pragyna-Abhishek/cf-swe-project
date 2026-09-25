@@ -14,7 +14,8 @@
 import { AgentWorkflow, WorkflowRejectedError, type AgentWorkflowEvent, type AgentWorkflowStep } from "agents/workflows";
 import { NonRetryableError } from "cloudflare:workflows";
 import { planChunks } from "../core/chunks";
-import { buildDraftRulePrompt, type PriorAttempt } from "../core/prompt";
+import { CLASSIFY_JSON_SCHEMA, HYPOTHESIZE_JSON_SCHEMA, WRITE_REPORT_JSON_SCHEMA } from "../core/narrative-schema";
+import { buildClassifyPrompt, buildDraftRulePrompt, buildHypothesizePrompt, buildReportPrompt, type PriorAttempt } from "../core/prompt";
 import { toReplayResult } from "../core/replay";
 import { mergeChunkReplays, type ChunkReplay } from "../core/rules/evaluate";
 import { RULE_JSON_SCHEMA } from "../core/rules/schema";
@@ -22,7 +23,7 @@ import { findScenario } from "../core/scenarios";
 import type { ReplayResult, RuleVersionStatus, TrafficSummary } from "../core/types";
 import type { IncidentAgent } from "./agent";
 import { modelFor } from "./model";
-import { DRAFT_RULE_TEMPLATES } from "./prompts";
+import { CLASSIFY_SYMPTOM_TEMPLATES, DRAFT_RULE_TEMPLATES, HYPOTHESIZE_TEMPLATES, WRITE_REPORT_TEMPLATES } from "./prompts";
 import type { InvestigationParams } from "./views";
 
 /** DESIGN.md section 8: "i runs from 1 to MAX_DRAFT_ATTEMPTS (3)." A constant, never model output. */
@@ -31,6 +32,10 @@ export const MAX_DRAFT_ATTEMPTS = 3;
 export const STEP = {
   ensureTraffic: "ensure-traffic",
   aggregateTraffic: "aggregate-traffic",
+  loadMemory: "load-memory",
+  classifySymptom: "classify-symptom",
+  hypothesize: "hypothesize",
+  writeReport: "write-report",
   draftRule: (i: number) => `draft-rule-attempt-${i}`,
   validateRule: (i: number) => `validate-rule-attempt-${i}`,
   draftFeedback: (i: number) => `draft-feedback-attempt-${i}`,
@@ -93,6 +98,9 @@ export class InvestigationWorkflow extends AgentWorkflow<IncidentAgent, Investig
     );
 
     // 4. Summaries only. This is the whole of what the model will see about traffic.
+    // Runs before steps 2 and 3 below: both need the summary (its "signals", or its evidence
+    // IDs), which does not exist yet at DESIGN.md section 8's original step numbering. Recorded
+    // there as a correction, the same way the retry loop's exit condition was.
     const summary = await step.do(STEP.aggregateTraffic, cpuHeavy, () =>
       tracked<TrafficSummary>(
         STEP.aggregateTraffic,
@@ -100,6 +108,51 @@ export class InvestigationWorkflow extends AgentWorkflow<IncidentAgent, Investig
         (s) => `${s.breakdowns.length + s.symptomSlice.breakdowns.length} breakdowns over ${s.totalRequests} requests`,
       ),
     );
+
+    // 2. Prior lessons for this scenario's family, if any.
+    const memory = await step.do(STEP.loadMemory, cheap, () =>
+      tracked<{ lessons: string[] }>(
+        STEP.loadMemory,
+        () => agent.loadMemory(p.scenarioId, p.incidentId),
+        (m) => (m.lessons.length ? `${m.lessons.length} prior lesson(s)` : "no prior lessons"),
+      ),
+    );
+
+    // 3. Classify the symptom into a fixed enum. Informational only: it shapes the hypothesize
+    // prompt below and nothing else, so a bad classification degrades gracefully.
+    const classification = await step.do(STEP.classifySymptom, modelCall, () =>
+      tracked<{ intent: string }>(
+        STEP.classifySymptom,
+        async () => {
+          const model = modelFor(this.env);
+          const prompt = buildClassifyPrompt(CLASSIFY_SYMPTOM_TEMPLATES, { symptom: p.symptom, signals: summary.signals });
+          const response = await model.generateJson({ ...prompt, purpose: "classify-symptom", jsonSchema: CLASSIFY_JSON_SCHEMA });
+          return agent.classifySymptom(response);
+        },
+        (c) => c.intent,
+      ),
+    );
+
+    // 5. A hypothesis citing evidence IDs. A fabricated citation is caught and surfaced (the
+    // step's own recorded detail says so), never rendered as if it were backed by data.
+    const hypothesis = await step.do(STEP.hypothesize, modelCall, () =>
+      tracked<{ hypothesis: string | null; fabricatedCitations: string[] }>(
+        STEP.hypothesize,
+        async () => {
+          const model = modelFor(this.env);
+          const prompt = buildHypothesizePrompt(HYPOTHESIZE_TEMPLATES, {
+            symptom: p.symptom,
+            intent: classification.intent,
+            summary,
+            lessons: memory.lessons,
+          });
+          const response = await model.generateJson({ ...prompt, purpose: "hypothesize", jsonSchema: HYPOTHESIZE_JSON_SCHEMA });
+          return agent.hypothesize(p.incidentId, response);
+        },
+        (h) => (h.fabricatedCitations.length ? `rejected: fabricated citations ${h.fabricatedCitations.join(", ")}` : (h.hypothesis ?? "none")),
+      ),
+    );
+    void hypothesis;
 
     // 6, 7, 8 (loop). Up to MAX_DRAFT_ATTEMPTS drafts. A schema or type failure feeds its
     // diagnostics back into the next attempt's prompt and retries; a roundtrip failure is our
@@ -171,7 +224,7 @@ export class InvestigationWorkflow extends AgentWorkflow<IncidentAgent, Investig
 
     const finalDraftId = draftId;
     const replayName = STEP.replayRule(finalAttempt);
-    await step.do(replayName, cpuHeavy, () =>
+    const proposedReplay = await step.do(replayName, cpuHeavy, () =>
       tracked<ReplayResult>(replayName, async () => agent.recordReplay(finalDraftId, await replayAll(finalDraftId, false)), describeReplay),
     );
 
@@ -234,6 +287,21 @@ export class InvestigationWorkflow extends AgentWorkflow<IncidentAgent, Investig
         STEP.verifyRecovery,
         async () => toReplayResult((await replayAll(applied.ruleVersionId, true)).counts, def.scenario.thresholds, "ev_recovery"),
         describeReplay,
+      ),
+    );
+
+    // 13. Report and lesson. The lesson is persisted for later investigations in this family.
+    await step.do(STEP.writeReport, modelCall, () =>
+      tracked<{ report: string | null; lesson: string | null }>(
+        STEP.writeReport,
+        async () => {
+          const model = modelFor(this.env);
+          const outcome = { proposedRule: describeReplay(proposedReplay), recovery: describeReplay(recovery), approved: true };
+          const prompt = buildReportPrompt(WRITE_REPORT_TEMPLATES, { symptom: p.symptom, hypothesis: hypothesis.hypothesis, outcome });
+          const response = await model.generateJson({ ...prompt, purpose: "write-report", jsonSchema: WRITE_REPORT_JSON_SCHEMA });
+          return agent.writeReport(p.incidentId, response);
+        },
+        (r) => r.lesson ?? "no lesson recorded",
       ),
     );
 

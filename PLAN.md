@@ -17,7 +17,8 @@ cannot be verified by running something, it is not a criterion.
 | 1 | Built, tested locally, deployed | `https://portcullis.pragyna-portcullis.workers.dev` is live and serving. The 60-second demo has not yet been driven against the deployed URL in a browser. The model's rule step is expected to keep failing visibly on this account until 0.4's fallback 2 is re-measured and confirmed (see Phase 0) |
 | 2 | Built, tested | Abhishek to review the grammar in DESIGN.md section 7 |
 | 3 | Built, tested (fake model only; not yet exercised against the real model, see Phase 0) | Bounded retry loop, diagnostics feedback, attempt history all implemented (`src/server/workflow.ts`, `src/core/prompt.ts`). Real-model behavior under retry is unverified until 0.4 is resolved |
-| 4 to 7 | Not started | |
+| 4 | Built, tested (fake model only; not yet exercised against the real model, see Phase 0) | 8 scenarios across 3 families (3 traps: asn, country, userAgent) in `src/core/scenarios.ts`. Evidence ledger (`evidence` table), citation checking (`src/core/citations.ts`), memory (`lessons` table, retrieved per scenario family), classify/hypothesize/write-report steps, retention pruning of `cf_agents_workflows`, and UI display of hypothesis/report/lesson with clickable evidence citations are all implemented and tested. All five Phase 4 acceptance criteria have a passing test (`test/unit/scenarios-all.test.ts`, `test/unit/citations.test.ts`, `test/integration/workflow.test.ts`) |
+| 5 to 7 | Not started | |
 
 Deviations from this plan, on purpose:
 

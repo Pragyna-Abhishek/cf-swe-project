@@ -82,3 +82,45 @@ export function buildDraftRulePrompt(
     }),
   };
 }
+
+/** Phase 4: classify the symptom into a fixed enum, from signals alone (no raw traffic). */
+export function buildClassifyPrompt(t: PromptTemplates, input: { symptom: string; signals: TrafficSummary["signals"] }): Prompt {
+  return {
+    system: t.system,
+    user: renderTemplate(t.user, {
+      symptom: jsonForPrompt(input.symptom),
+      signals: jsonForPrompt(input.signals),
+    }),
+  };
+}
+
+/** Phase 4: form a hypothesis citing evidence IDs, informed by prior lessons for the family. */
+export function buildHypothesizePrompt(
+  t: PromptTemplates,
+  input: { symptom: string; intent: string; summary: TrafficSummary; lessons: readonly string[] },
+): Prompt {
+  return {
+    system: t.system,
+    user: renderTemplate(t.user, {
+      symptom: jsonForPrompt(input.symptom),
+      intent: input.intent,
+      summary: jsonForPrompt(summaryForPrompt(input.summary)),
+      lessons: jsonForPrompt(input.lessons),
+    }),
+  };
+}
+
+/** Phase 4: the closing report and one-sentence lesson, from the measured outcome only. */
+export function buildReportPrompt(
+  t: PromptTemplates,
+  input: { symptom: string; hypothesis: string | null; outcome: unknown },
+): Prompt {
+  return {
+    system: t.system,
+    user: renderTemplate(t.user, {
+      symptom: jsonForPrompt(input.symptom),
+      hypothesis: jsonForPrompt(input.hypothesis),
+      outcome: jsonForPrompt(input.outcome),
+    }),
+  };
+}

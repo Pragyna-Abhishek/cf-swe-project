@@ -412,7 +412,7 @@ export function listEvidence(sql: SqlStorage, incidentId: string): Evidence[] {
       kind: r.kind as Evidence["kind"],
       claim: r.claim,
       producedBy: r.produced_by,
-      data: JSON.parse(r.data) as unknown,
+      data: JSON.parse(r.data) as Evidence["data"],
       createdAt: r.created_at,
     }));
 }

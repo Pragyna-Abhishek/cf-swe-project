@@ -449,8 +449,13 @@ export type Evidence = {
   claim: string;
   /** Which deterministic tool produced it. */
   producedBy: string;
-  /** Small serialized payload. Never raw requests. */
-  data: unknown;
+  /**
+   * Small serialized payload, never raw requests. Typed as a concrete union rather than
+   * `unknown`: the Agent SDK's RPC stub typing collapses a state shape containing `unknown` to
+   * `never`, which silently breaks every `agent.state` access at every call site, not just this
+   * one (measured while wiring the evidence ledger into AgentState in Phase 4).
+   */
+  data: Breakdown | ReplayResult;
   createdAt: number;
 };
 

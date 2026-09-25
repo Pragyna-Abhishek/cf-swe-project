@@ -38,6 +38,10 @@ describe("investigation workflow, end to end with the fake model", () => {
     expect(baseline.legitimateBlocked).toBeGreaterThan(replay.legitimateBlocked);
     expect(view?.steps.map((s) => s.name)).toContain("wait-for-approval");
     expect(view?.modelId).toBe("fake");
+    // Phase 4: the hypothesis cites real evidence, and the cited evidence is in the ledger.
+    expect(incident.hypothesis).toContain("ev_4");
+    expect(view?.evidence.some((e) => e.id === "ev_4" && e.kind === "breakdown")).toBe(true);
+    expect(view?.evidence.length).toBeGreaterThan(0);
     void instance;
   });
 
@@ -197,6 +201,69 @@ describe("the bounded draft retry loop (Phase 3)", () => {
     const stepNames = view?.steps.map((s) => s.name) ?? [];
     expect(stepNames).not.toContain("draft-rule-attempt-2");
     expect(stepNames).not.toContain("draft-feedback-attempt-1");
+  });
+});
+
+describe("hypothesis citations and memory (Phase 4)", () => {
+  it("a hypothesis citing a fabricated evidence ID is caught and never rendered", async () => {
+    const agent = await agentNamed("wf-fabricated-citation");
+    await using introspector = await introspectWorkflow(env.INVESTIGATION_WORKFLOW);
+    await introspector.modifyAll(async (m) => {
+      await m.disableRetryDelays();
+      await m.mockStepResult(
+        { name: "hypothesize" },
+        { hypothesis: "This cites a made-up id (ev_9999) that does not exist.", fabricatedCitations: ["ev_9999"] },
+      );
+    });
+    const { incidentId } = await agent.startInvestigation(SYMPTOM);
+    const incident = await waitForIncident(agent, incidentId, ["awaiting-approval", "failed"]);
+    // A rejected hypothesis does not stop the investigation: it is informational only, and it
+    // is never stored or rendered once its citation is fabricated.
+    expect(incident.status).toBe("awaiting-approval");
+    expect(incident.hypothesis).toBeNull();
+  });
+
+  it("a completed incident's lesson is retrieved by the next investigation in the same scenario family", async () => {
+    const agent = await agentNamed("wf-memory");
+    const first = await agent.startInvestigation(SYMPTOM);
+    await using firstInstance = await introspectWorkflowInstance(env.INVESTIGATION_WORKFLOW, first.incidentId);
+    const awaiting = await waitForIncident(agent, first.incidentId, ["awaiting-approval"]);
+    if (!awaiting.proposedRuleVersionId) throw new Error("no proposal");
+    await agent.approve(first.incidentId, awaiting.proposedRuleVersionId);
+    await firstInstance.waitForStatus("complete");
+    const done = await waitForIncident(agent, first.incidentId, ["applied"]);
+    expect(done.lesson).not.toBeNull();
+    expect(done.report).not.toBeNull();
+
+    const second = await agent.startInvestigation(SYMPTOM);
+    await using secondInstance = await introspectWorkflowInstance(env.INVESTIGATION_WORKFLOW, second.incidentId);
+    await waitForIncident(agent, second.incidentId, ["awaiting-approval", "failed"]);
+    const state = await agent.state;
+    const view = state.incidents.find((i) => i.id === second.incidentId);
+    const step = view?.steps.find((s) => s.name === "load-memory");
+    expect(step?.detail).toBe("1 prior lesson(s)");
+    void secondInstance;
+  });
+});
+
+describe("workflow tracking retention (Phase 4)", () => {
+  it("deletes complete/errored tracking rows older than the retention window, keeps the rest", async () => {
+    const agent = await agentNamed("wf-retention");
+    const dayMs = 24 * 60 * 60 * 1000;
+    // Older than the 7 day retention window and finished: should be pruned.
+    await agent.seedWorkflowTrackingRowForTest("old-complete", "complete", 8 * 24 * 60 * 60);
+    await agent.seedWorkflowTrackingRowForTest("old-errored", "errored", 10 * 24 * 60 * 60);
+    // Within the window: kept even though finished.
+    await agent.seedWorkflowTrackingRowForTest("recent-complete", "complete", 60);
+    // Old but still running: kept regardless of age.
+    await agent.seedWorkflowTrackingRowForTest("old-running", "running", 30 * 24 * 60 * 60);
+
+    const before = await agent.countWorkflowTrackingRowsForTest();
+    const deleted = await agent.pruneWorkflowTrackingForTest(7 * dayMs);
+    const after = await agent.countWorkflowTrackingRowsForTest();
+
+    expect(deleted).toBe(2);
+    expect(after).toBe(before - 2);
   });
 });
 

@@ -1,7 +1,7 @@
 // Shapes shared by the Agent, the Workflow and the UI. Server-side only in the sense that the
 // server produces them; the UI imports these types, never the server code.
 
-import type { Incident, RuleVersion, Scenario, TrafficSummary } from "../core/types";
+import type { Evidence, Incident, RuleVersion, Scenario, TrafficSummary } from "../core/types";
 
 export type StepStatus = "running" | "complete" | "error" | "waiting";
 
@@ -18,6 +18,8 @@ export type IncidentView = Incident & {
   blockedPanels: { proposed: number[][] | null; baseline: number[][] | null };
   /** Summary the rule was drafted from, for the evidence panel. */
   summary: TrafficSummary | null;
+  /** Every evidence record produced for this incident, for the hypothesis's citations to resolve. */
+  evidence: Evidence[];
   modelId: string;
 };
 
