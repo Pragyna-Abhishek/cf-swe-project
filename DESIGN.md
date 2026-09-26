@@ -74,12 +74,14 @@ build has a target.
 The percentages above were placeholders written before implementation. Measured since, on the
 simulator for the committed scenario and seed (docs/spikes.md): the naive rule blocks 62.3% of
 attack and **46.3% of legitimate** traffic. A precise hand-written rule blocks 100% and 0%. What the
-real model's rule achieves is measured now (docs/spikes.md, 0.4), and it is a negative result: 0/30
-attempts against the real model produced valid JSON at all, so no real-model rule has yet passed
-replay. The AST-as-nested-JSON-Schema encoding needs a fallback (PLAN.md's ordered list, starting
-with flattening the schema) before this demo beat is achievable with the real model. The demo with
-the fake model runs end to end locally today; the "hypothesis" and "report and lesson" beats are
-Phase 4.
+real model's rule achieves is measured (docs/spikes.md, 0.4), and it is a negative result against
+the original schema: 0/30 attempts produced valid JSON at all. The shipped fallback (flat,
+type-split leaf kinds, PLAN.md's 0.4 fallback list) has not been re-measured against the real
+model: the account's Workers AI daily neuron quota has been exhausted since, and still is
+(`docs/eval-results/README.md`). The demo with the fake model, including the hypothesis and
+report-and-lesson beats built in Phase 4, runs end to end locally today
+(`npx wrangler dev --local --var MODEL_MODE:fake`); it has not yet been driven against the deployed
+URL with a working real-model call.
 
 ## 4. Architecture
 

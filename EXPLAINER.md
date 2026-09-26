@@ -4,10 +4,13 @@ This document explains what Portcullis is, why it is built the way it is, and ho
 once it exists. It starts from zero background and ends at the level of detail in `DESIGN.md`. You
 do not need to know anything about Cloudflare, web security, or TypeScript before you start.
 
-**Important, read this first: Phases 0 to 2 of `PLAN.md` are now built.** The whole loop in this
-document (traffic, investigation, rule drafting, verification, replay, approval, apply, recovery)
-runs locally with a fake model standing in for the real one, and is covered by tests. It has not
-been deployed, and the real model has not yet been measured. Each part below says whether it
+**Important, read this first: Phases 0 to 6 of `PLAN.md` are now built and deployed** to
+`https://portcullis.pragyna-portcullis.workers.dev`. The whole loop in this document (traffic,
+investigation, rule drafting, verification, replay, approval, apply, recovery), plus the retry
+loop, the evidence ledger, memory, the eval harness with its four ablations, and failure injection,
+all run and are covered by tests. The real model's rule quality is still unmeasured: the account's
+Workers AI free-tier neuron quota has been exhausted since Phase 0's spikes, so every number cited
+below comes from the fake model unless the text says otherwise. Each part below says whether it
 describes something **(built)** or **(planned)**. Part 9 gives the exact status.
 
 ## Table of contents
@@ -679,14 +682,14 @@ precision matters more than narrative.
 
 | Phase | What it delivers | Status |
 | --- | --- | --- |
-| 0 | Spikes and measurements: is the model usable, does the CPU budget behave as expected, how much traffic fits in 10 ms | Partly done. The CPU sizing is measured (on the development machine, not on Cloudflare). The other three need a Cloudflare account; the tools to measure them are built |
-| 1 | A thin end-to-end slice: one scenario, the full approve and apply loop | Built and tested locally with the fake model. Not deployed yet |
+| 0 | Spikes and measurements: is the model usable, does the CPU budget behave as expected, how much traffic fits in 10 ms | 0.1 to 0.3 measured on the account or locally. 0.4 (structured output reliability) measured **negative** on the first schema shape; the flat, type-split schema fallback is what ships. See `docs/spikes.md` |
+| 1 | A thin end-to-end slice: one scenario, the full approve and apply loop | Built, tested, deployed |
 | 2 | The real, full parser and evaluator, thoroughly tested | Built and tested |
-| 3 | The bounded retry loop, with diagnostics fed back to the model | Not started |
-| 4 | More scenarios, a full evidence ledger, memory of past incidents | Not started |
-| 5 | An evaluation harness with ablation experiments | Not started |
-| 6 | Failure-injection tests and tracing | Not started |
-| 7 | UI polish, a real README, the prompt-history documentation | Not started |
+| 3 | The bounded retry loop, with diagnostics fed back to the model | Built and tested |
+| 4 | More scenarios, a full evidence ledger, memory of past incidents | Built and tested |
+| 5 | An evaluation harness with ablation experiments | Built and tested against the fake model; `--real` implemented and smoke-tested, blocked on Workers AI quota. See `docs/eval-results/README.md` |
+| 6 | Failure-injection tests and tracing | Built and tested |
+| 7 | UI polish, a real README, the prompt-history documentation | Built. This document, `README.md` and `PROMPTS.md` reflect it |
 
 Phase 1 was planned to use a deliberately tiny grammar first, with the full grammar in Phase 2.
 Since both were built together, the full grammar went in directly.
@@ -711,8 +714,9 @@ What has actually been measured, in `docs/spikes.md`:
 | `src/server/` | The Cloudflare layer: `index.ts` (Worker entry), `agent.ts` (`IncidentAgent`), `workflow.ts` (`InvestigationWorkflow`), `store.ts` (SQLite) |
 | `ui/` | The React page |
 | `prompts/` | The prompt templates, as plain text files |
-| `test/unit/`, `test/integration/` | 159 fast tests of the core, and 14 tests of the real Agent and Workflow running in Cloudflare's local runtime |
-| `spikes/`, `scripts/` | Tools for the measurements that need a Cloudflare account |
+| `src/eval/` | The eval harness and its response cache (Phase 5) |
+| `test/unit/`, `test/integration/` | 204 fast tests of the core, and 40 tests of the real Agent and Workflow running in Cloudflare's local runtime, including the Phase 6 failure-injection suite |
+| `spikes/`, `scripts/` | Tools for the measurements that need a Cloudflare account, and the eval harness's CLI driver |
 
 ---
 
