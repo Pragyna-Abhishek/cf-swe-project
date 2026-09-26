@@ -22,3 +22,18 @@ export interface ModelClient {
   readonly modelId: string;
   generateJson(request: ModelRequest): Promise<ModelResponse>;
 }
+
+/**
+ * The draft-rule step has no diagnostic feedback loop for a transport failure (only for a
+ * schema/type failure), so a rate limit or a provider error is not retried at the prompt level:
+ * it throws, which the Workflow's own step retry policy (backoff, then eventually fail the
+ * incident visibly) handles instead. `json-mode-failed` is not thrown here: DESIGN.md treats it
+ * as a schema failure, so the caller feeds it back into the retry loop like any other one.
+ */
+export function requireOkResponse(
+  response: ModelResponse,
+): asserts response is Exclude<ModelResponse, { kind: "rate-limited" } | { kind: "error" }> {
+  if (response.kind === "rate-limited" || response.kind === "error") {
+    throw new Error(`model call failed (${response.kind}): ${response.message}`);
+  }
+}

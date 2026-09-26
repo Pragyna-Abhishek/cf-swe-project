@@ -286,6 +286,11 @@ function IncidentPanel({
   );
 }
 
+/** Phase 6: step timings, so a reviewer can see where an incident spent its time. */
+function formatDurationMs(ms: number): string {
+  return ms < 1000 ? `${ms} ms` : `${(ms / 1000).toFixed(1)} s`;
+}
+
 function Steps({ incident }: { incident: IncidentView }) {
   return (
     <ol className="steps">
@@ -293,6 +298,7 @@ function Steps({ incident }: { incident: IncidentView }) {
         <li key={s.name} className={`step step-${s.status}`}>
           <span className="step-name">{s.name}</span>
           <span className="step-status">{s.status}</span>
+          <span className="muted step-duration">{s.durationMs !== null ? formatDurationMs(s.durationMs) : ""}</span>
           {s.detail && <span className="muted step-detail">{s.detail}</span>}
         </li>
       ))}

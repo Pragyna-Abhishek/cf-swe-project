@@ -5,7 +5,12 @@ import type { Evidence, Incident, RuleVersion, Scenario, TrafficSummary } from "
 
 export type StepStatus = "running" | "complete" | "error" | "waiting";
 
-export type StepView = { name: string; status: StepStatus; detail: string | null; at: number };
+/**
+ * `durationMs` is `at - startedAt`, populated once the step reaches a terminal status
+ * (`complete` or `error`); `null` while `running` or `waiting`, since there is no end time yet.
+ * Phase 6: step timings surfaced in the UI.
+ */
+export type StepView = { name: string; status: StepStatus; detail: string | null; at: number; startedAt: number; durationMs: number | null };
 
 export type IncidentView = Incident & {
   steps: StepView[];

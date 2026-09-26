@@ -892,6 +892,12 @@ The README will carry measured numbers or state that none exist yet.
 | Durable Object evicted mid-run | Not observable from inside | Workflow unaffected. See section 8 |
 | Workers AI rate limited | HTTP 429 | Step retry with exponential backoff. The eval harness avoids this via caching |
 | Workflow tracking table grows unbounded | `cf_agents_workflows` row count | Retention policy: delete `complete` and `errored` tracking rows older than 7 days. The SDK does not do this for us |
+| Any other step exhausts its retries (Phase 6) | `onWorkflowError` (Agent lifecycle callback) | Catch-all: any step's error that is not one of the specific cases above still ends the incident in `failed` with the thrown message, never a silent hang. `test/integration/failure-injection.test.ts` forces every step in the table in section 8 to error (or, for one step, to time out) and asserts this |
+
+Every step transition, approval decision, and terminal status change is also written as a
+structured JSON log line (`src/server/log.ts`), keyed by `incidentId`, so a single investigation's
+events can be filtered out of `wrangler tail` output even with several incidents running
+concurrently.
 
 ## 11. Security
 

@@ -21,6 +21,7 @@ import { mergeChunkReplays, type ChunkReplay } from "../core/rules/evaluate";
 import { RULE_JSON_SCHEMA } from "../core/rules/schema";
 import { findScenario } from "../core/scenarios";
 import type { ReplayResult, RuleVersionStatus, TrafficSummary } from "../core/types";
+import { requireOkResponse } from "../model/client";
 import type { IncidentAgent } from "./agent";
 import { modelFor } from "./model";
 import { CLASSIFY_SYMPTOM_TEMPLATES, DRAFT_RULE_TEMPLATES, HYPOTHESIZE_TEMPLATES, WRITE_REPORT_TEMPLATES } from "./prompts";
@@ -166,9 +167,7 @@ export class InvestigationWorkflow extends AgentWorkflow<IncidentAgent, Investig
           const model = modelFor(this.env);
           const prompt = buildDraftRulePrompt(DRAFT_RULE_TEMPLATES, { symptom: p.symptom, summary, priorAttempts });
           const response = await model.generateJson({ ...prompt, purpose: "draft-rule", jsonSchema: RULE_JSON_SCHEMA });
-          if (response.kind === "rate-limited" || response.kind === "error") {
-            throw new Error(`model call failed (${response.kind}): ${response.message}`);
-          }
+          requireOkResponse(response);
           return agent.recordDraft(p.incidentId, attempt, response);
         }),
       );
