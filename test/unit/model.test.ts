@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { aggregateChunk, finalizeSummary } from "../../src/core/aggregator";
 import { buildDraftRulePrompt, renderTemplate } from "../../src/core/prompt";
 import { generateAll } from "../../src/core/simulator";
+import { requireOkResponse } from "../../src/model/client";
 import { cannedModel, FakeModelClient } from "../../src/model/fake";
 import { classifyError, toResponse, WorkersAiModelClient } from "../../src/model/workers-ai";
 import { RULE_JSON_SCHEMA } from "../../src/core/rules/schema";
@@ -140,5 +141,22 @@ describe("fake model", () => {
   it("the canned model returns a schema-shaped rule", async () => {
     const r = await cannedModel().generateJson({ purpose: "draft-rule", system: "", user: "", jsonSchema: {} });
     expect(r.kind).toBe("ok");
+  });
+});
+
+describe("requireOkResponse (Phase 6: model rate limiting)", () => {
+  it("passes through ok and json-mode-failed", () => {
+    expect(() => requireOkResponse({ kind: "ok", raw: "{}" })).not.toThrow();
+    expect(() => requireOkResponse({ kind: "json-mode-failed", message: "nope" })).not.toThrow();
+  });
+
+  it("throws a descriptive error on rate-limited, the draft step's own rate-limit handling", () => {
+    expect(() => requireOkResponse({ kind: "rate-limited", message: "429: too many requests" })).toThrow(
+      /model call failed \(rate-limited\): 429/,
+    );
+  });
+
+  it("throws a descriptive error on a transport error", () => {
+    expect(() => requireOkResponse({ kind: "error", message: "connection reset" })).toThrow(/model call failed \(error\): connection reset/);
   });
 });

@@ -74,12 +74,14 @@ build has a target.
 The percentages above were placeholders written before implementation. Measured since, on the
 simulator for the committed scenario and seed (docs/spikes.md): the naive rule blocks 62.3% of
 attack and **46.3% of legitimate** traffic. A precise hand-written rule blocks 100% and 0%. What the
-real model's rule achieves is measured now (docs/spikes.md, 0.4), and it is a negative result: 0/30
-attempts against the real model produced valid JSON at all, so no real-model rule has yet passed
-replay. The AST-as-nested-JSON-Schema encoding needs a fallback (PLAN.md's ordered list, starting
-with flattening the schema) before this demo beat is achievable with the real model. The demo with
-the fake model runs end to end locally today; the "hypothesis" and "report and lesson" beats are
-Phase 4.
+real model's rule achieves is measured (docs/spikes.md, 0.4), and it is a negative result against
+the original schema: 0/30 attempts produced valid JSON at all. The shipped fallback (flat,
+type-split leaf kinds, PLAN.md's 0.4 fallback list) has not been re-measured against the real
+model: the account's Workers AI daily neuron quota has been exhausted since, and still is
+(`docs/eval-results/README.md`). The demo with the fake model, including the hypothesis and
+report-and-lesson beats built in Phase 4, runs end to end locally today
+(`npx wrangler dev --local --var MODEL_MODE:fake`); it has not yet been driven against the deployed
+URL with a working real-model call.
 
 ## 4. Architecture
 
@@ -892,6 +894,12 @@ The README will carry measured numbers or state that none exist yet.
 | Durable Object evicted mid-run | Not observable from inside | Workflow unaffected. See section 8 |
 | Workers AI rate limited | HTTP 429 | Step retry with exponential backoff. The eval harness avoids this via caching |
 | Workflow tracking table grows unbounded | `cf_agents_workflows` row count | Retention policy: delete `complete` and `errored` tracking rows older than 7 days. The SDK does not do this for us |
+| Any other step exhausts its retries (Phase 6) | `onWorkflowError` (Agent lifecycle callback) | Catch-all: any step's error that is not one of the specific cases above still ends the incident in `failed` with the thrown message, never a silent hang. `test/integration/failure-injection.test.ts` forces every step in the table in section 8 to error (or, for one step, to time out) and asserts this |
+
+Every step transition, approval decision, and terminal status change is also written as a
+structured JSON log line (`src/server/log.ts`), keyed by `incidentId`, so a single investigation's
+events can be filtered out of `wrangler tail` output even with several incidents running
+concurrently.
 
 ## 11. Security
 

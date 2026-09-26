@@ -24,6 +24,7 @@ import { SCENARIOS, type ScenarioDefinition } from "../core/scenarios";
 import { compileScenario, generateRange } from "../core/simulator";
 import type { Diagnostic, Incident, IncidentStatus, ReplayResult, RuleVersion, TrafficSummary } from "../core/types";
 import type { ModelResponse } from "../model/client";
+import { logEvent } from "./log";
 import * as store from "./store";
 import type { AgentState, IncidentView, InvestigationParams, StepStatus, TrafficState } from "./views";
 
@@ -216,6 +217,7 @@ export class IncidentAgent extends Agent<Env, AgentState> {
       updatedAt: decidedAt,
     });
     await this.approveWorkflow(incident.workflowInstanceId, { metadata: { ruleVersionId: ruleVersionIdInput } });
+    logEvent(incident.id, "decision", { decision: "approved", ruleVersionId: ruleVersionIdInput });
     this.refreshState();
     return { ok: true };
   }
@@ -243,6 +245,7 @@ export class IncidentAgent extends Agent<Env, AgentState> {
     });
     this.markVersion(incident.proposedRuleVersionId, "rejected");
     await this.rejectWorkflow(incident.workflowInstanceId, { reason: reason ?? "rejected by operator" });
+    logEvent(incident.id, "decision", { decision: "rejected", reason });
     this.refreshState();
     return { ok: true };
   }
@@ -318,6 +321,7 @@ export class IncidentAgent extends Agent<Env, AgentState> {
 
   recordStep(incidentId: string, name: string, status: StepStatus, detail: string | null): void {
     store.upsertStep(this.db, incidentId, name, status, detail, Date.now());
+    logEvent(incidentId, "step", { name, status, detail });
     this.refreshState();
   }
 
@@ -554,6 +558,7 @@ export class IncidentAgent extends Agent<Env, AgentState> {
   markIncident(incidentId: string, status: Extract<IncidentStatus, "failed" | "timed-out" | "rejected">, reason: string | null): void {
     const incident = this.incidentOrThrow(incidentId);
     if (TERMINAL.includes(incident.status)) return;
+    logEvent(incidentId, "status", { status, reason });
     this.saveIncident({ ...incident, status, failureReason: status === "failed" ? reason : incident.failureReason });
   }
 
@@ -574,6 +579,7 @@ export class IncidentAgent extends Agent<Env, AgentState> {
     store.saveRuleVersion(this.db, { ...v, status: "applied" });
     this.compiled.clear();
     this.saveIncident({ ...incident, appliedRuleVersionId: proposedId });
+    logEvent(incidentId, "status", { status: "applied", ruleVersionId: proposedId });
     return { ruleVersionId: proposedId };
   }
 

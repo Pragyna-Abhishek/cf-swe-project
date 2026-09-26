@@ -93,6 +93,13 @@ export const SCHEMA = [
 
 export function migrate(sql: SqlStorage): void {
   for (const stmt of SCHEMA) sql.exec(stmt);
+  // Added in Phase 6 for step timings. A Durable Object created before this change already has
+  // the `steps` table, so `CREATE TABLE IF NOT EXISTS` above does not add the column; this does.
+  try {
+    sql.exec("ALTER TABLE steps ADD COLUMN started_at INTEGER");
+  } catch {
+    // Column already exists.
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -322,26 +329,38 @@ export function countUnsafeActions(sql: SqlStorage): number {
 // Steps and summaries
 // ---------------------------------------------------------------------------
 
+/**
+ * `started_at` is only ever set by the INSERT branch: it is not in the ON CONFLICT SET list, so
+ * a step's first recorded timestamp (when it moved to "running") survives every later update to
+ * the same row, and `at` keeps tracking the most recent one.
+ */
 export function upsertStep(sql: SqlStorage, incidentId: string, name: string, status: StepStatus, detail: string | null, at: number) {
   sql.exec(
-    `INSERT INTO steps (incident_id, name, status, detail, at) VALUES (?, ?, ?, ?, ?)
+    `INSERT INTO steps (incident_id, name, status, detail, at, started_at) VALUES (?, ?, ?, ?, ?, ?)
      ON CONFLICT(incident_id, name) DO UPDATE SET status = excluded.status, detail = excluded.detail, at = excluded.at`,
     incidentId,
     name,
     status,
     detail,
     at,
+    at,
   );
 }
 
+const TERMINAL_STEP_STATUS: readonly StepStatus[] = ["complete", "error"];
+
 export function listSteps(sql: SqlStorage, incidentId: string): StepView[] {
   return sql
-    .exec<{ name: string; status: StepStatus; detail: string | null; at: number }>(
-      "SELECT name, status, detail, at FROM steps WHERE incident_id = ? ORDER BY rowid",
+    .exec<{ name: string; status: StepStatus; detail: string | null; at: number; started_at: number | null }>(
+      "SELECT name, status, detail, at, started_at FROM steps WHERE incident_id = ? ORDER BY rowid",
       incidentId,
     )
     .toArray()
-    .map((r) => ({ name: r.name, status: r.status, detail: r.detail, at: r.at }));
+    .map((r) => {
+      const startedAt = r.started_at ?? r.at;
+      const durationMs = TERMINAL_STEP_STATUS.includes(r.status) ? r.at - startedAt : null;
+      return { name: r.name, status: r.status, detail: r.detail, at: r.at, startedAt, durationMs };
+    });
 }
 
 export function saveSummary(sql: SqlStorage, incidentId: string, data: string): void {

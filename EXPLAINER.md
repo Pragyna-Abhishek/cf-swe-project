@@ -4,11 +4,14 @@ This document explains what Portcullis is, why it is built the way it is, and ho
 once it exists. It starts from zero background and ends at the level of detail in `DESIGN.md`. You
 do not need to know anything about Cloudflare, web security, or TypeScript before you start.
 
-**Important, read this first: Phases 0 to 2 of `PLAN.md` are now built.** The whole loop in this
-document (traffic, investigation, rule drafting, verification, replay, approval, apply, recovery)
-runs locally with a fake model standing in for the real one, and is covered by tests. It has not
-been deployed, and the real model has not yet been measured. Each part below says whether it
-describes something **(built)** or **(planned)**. Part 9 gives the exact status.
+**Important, read this first: all seven phases of `PLAN.md` are now built, tested and deployed** to
+`https://portcullis.pragyna-portcullis.workers.dev`. The whole loop in this document (traffic,
+investigation, rule drafting, verification, replay, approval, apply, recovery), plus the retry
+loop, the evidence ledger, memory, the eval harness with its four ablations, and failure injection,
+all run and are covered by tests. The real model's rule quality is still unmeasured: the account's
+Workers AI free-tier neuron quota has been exhausted since Phase 0's spikes, so every number cited
+below comes from the fake model unless the text says otherwise. Every section below is now
+**(built)**; Part 9 gives the exact status and remaining caveats.
 
 ## Table of contents
 
@@ -100,7 +103,7 @@ rule against real numbers, and ultimately to a person.
 
 ## 2. A day in the life
 
-**(built, except the hypothesis and report beats, which are Phase 4)** This section walks through one complete use of Portcullis from start to finish, in
+**(built)** This section walks through one complete use of Portcullis from start to finish, in
 plain language, the way an operator would actually experience it. It corresponds to the 60-second
 demo script in `DESIGN.md` section 3, slowed down and explained.
 
@@ -433,6 +436,28 @@ This matters for two reasons, both explained more in Part 7:
    If our printer and our parser ever disagree about what a given AST means, that's *our* bug, and
    it's treated as a hard stop, never quietly retried as if the model had made a mistake.
 
+### Finding this in the actual code
+
+Every box in the diagram above is one function, so you can jump straight from the picture to the
+file:
+
+| Box | Function | File |
+| --- | --- | --- |
+| Model emits `RuleAST` | schema handed to `response_format` | `src/core/rules/schema.ts` |
+| Our printer renders text | `printRule` | `src/core/rules/printer.ts` |
+| Our parser reads it back | `parseRule` (via the lexer) | `src/core/rules/parser.ts`, `src/core/rules/lexer.ts` |
+| Type checker | `typecheckRule` | `src/core/rules/typecheck.ts` |
+| Do the two ASTs match? | `astEqual` | `src/core/rules/pipeline.ts` |
+| The whole round-trip, called once per draft attempt | `verifyModelDraft` / `verifyAst` / `checkRuleText` | `src/core/rules/pipeline.ts` |
+| Evaluator replays traffic | `compileRule`, `matchMask`, `replayChunk` | `src/core/rules/evaluate.ts` |
+| The slow evaluator it is checked against | `referenceMatches`, `referenceReplay` | `src/core/rules/reference.ts` |
+| Every diagnostic code | `Diagnostic` union and its constructors | `src/core/rules/diagnostics.ts` |
+
+If you want to read the rules language start to finish, read those files in the order they appear
+in that table: lexer and parser first (syntax), then the type checker (meaning), then
+`pipeline.ts` (how a draft attempt actually calls all three and decides pass or fail), then
+`evaluate.ts` and `reference.ts` last (what happens once a rule is accepted).
+
 ### A worked example, concretely
 
 Suppose the model decides the right rule is "block requests to `/login` from network 12345."
@@ -468,19 +493,18 @@ and real customers share network 12345, then:
   users don't, like hitting `/login` at an unusual rate) can block nearly all the attack while
   barely touching real traffic.
 
-`DESIGN.md`'s demo script illustrates the kind of gap this produces (a naive rule blocking around
-41% of legitimate traffic versus a more careful rule blocking around 2%), but be clear about what
-that is: **those specific numbers are placeholders in the design document, not measurements.**
-Nothing has been run yet. They are marked UNVERIFIED there and repeated as UNVERIFIED here. The
-comparison itself (naive rule versus model's rule, shown side by side with real counts) is the
-actual point, and Phase 1 of the build plan exists specifically to produce real numbers to put in
-their place.
+This is now measured, on the simulator's credential-stuffing trap scenario (`docs/spikes.md`): the
+naive rule (block the shared network alone) blocks 62.3% of the attack but also 46.3% of legitimate
+traffic; the fake model's rule blocks 100% of the attack and 0% of legitimate traffic. That second
+number is against the fake model, not the real one (see the caveat in the header and in Part 9);
+the comparison itself, naive rule versus model's rule shown side by side with real counts, is the
+actual point, and it is what the UI renders for every investigation.
 
 ---
 
 ## 6. Orchestration: the workflow
 
-**(built for one draft attempt; the retry loop is Phase 3)** An investigation isn't one single action; it's a sequence of steps, some of which
+**(built, including the bounded retry loop)** An investigation isn't one single action; it's a sequence of steps, some of which
 might need to wait: for a slow model response, or for a human to get around to clicking a button,
 possibly days later. That waiting is the reason this whole part of Portcullis is built around a
 **Workflow** rather than an ordinary function call.
@@ -545,6 +569,31 @@ A few things worth calling out about this sequence:
 - **Step 11 is deliberately paranoid.** It doesn't receive "here's the rule, apply it" from whatever
   called it. It receives only an ID, and goes and re-reads the actual rule from storage using that
   ID. Part 7 explains exactly why this specific design choice exists.
+
+### Finding this in the actual code
+
+All fourteen steps are one `override async run(...)` method on `InvestigationWorkflow`, in
+`src/server/workflow.ts`. Every step is a call to `step.do(NAME, config, () => ...)`: `NAME` is a
+constant from the `STEP` object at the top of that file (this is what makes step names
+deterministic, per invariant 12 in `CLAUDE.md`), and `config` picks a retry policy suited to that
+step's kind of work (three named presets in the same file: `cheap`, `cpuHeavy`, `modelCall`, each
+with its own retry count and backoff). Reading the file top to bottom in source order matches the
+diagram top to bottom exactly, with two additions the diagram simplifies: `load-memory` (step 2)
+looks up a lesson from a past incident in the same scenario family before the model sees anything,
+and steps 6 to 8 (`draft-rule-attempt-N`, `validate-rule-attempt-N`, `replay-rule-attempt-N`) are
+generated in a loop up to 3 times, not written out three separate times, with a `draft-feedback`
+step in between attempts that only runs after a failed attempt.
+
+Two more files complete the orchestration picture:
+
+- `src/server/agent.ts` is `IncidentAgent`, the Durable Object. It is what starts the Workflow
+  (`ensureWorkflowStarted`), what `approve`/`reject` write to (the approval gate itself is a
+  Workflow `waitForEvent`, not code in the Agent), and what every step actually calls back into to
+  read or write SQLite rows and traffic. `onWorkflowError`, the catch-all described in Part 8's
+  test coverage below, also lives here.
+- `src/server/store.ts` is the thin SQLite layer underneath the Agent: table definitions, one
+  function per query (`upsertStep`, `listSteps`, `insertRuleVersion`, and so on). If you are
+  wondering "where does this field actually get persisted," this file has the answer.
 
 ---
 
@@ -679,14 +728,14 @@ precision matters more than narrative.
 
 | Phase | What it delivers | Status |
 | --- | --- | --- |
-| 0 | Spikes and measurements: is the model usable, does the CPU budget behave as expected, how much traffic fits in 10 ms | Partly done. The CPU sizing is measured (on the development machine, not on Cloudflare). The other three need a Cloudflare account; the tools to measure them are built |
-| 1 | A thin end-to-end slice: one scenario, the full approve and apply loop | Built and tested locally with the fake model. Not deployed yet |
+| 0 | Spikes and measurements: is the model usable, does the CPU budget behave as expected, how much traffic fits in 10 ms | 0.1 to 0.3 measured on the account or locally. 0.4 (structured output reliability) measured **negative** on the first schema shape; the flat, type-split schema fallback is what ships. See `docs/spikes.md` |
+| 1 | A thin end-to-end slice: one scenario, the full approve and apply loop | Built, tested, deployed |
 | 2 | The real, full parser and evaluator, thoroughly tested | Built and tested |
-| 3 | The bounded retry loop, with diagnostics fed back to the model | Not started |
-| 4 | More scenarios, a full evidence ledger, memory of past incidents | Not started |
-| 5 | An evaluation harness with ablation experiments | Not started |
-| 6 | Failure-injection tests and tracing | Not started |
-| 7 | UI polish, a real README, the prompt-history documentation | Not started |
+| 3 | The bounded retry loop, with diagnostics fed back to the model | Built and tested |
+| 4 | More scenarios, a full evidence ledger, memory of past incidents | Built and tested |
+| 5 | An evaluation harness with ablation experiments | Built and tested against the fake model; `--real` implemented and smoke-tested, blocked on Workers AI quota. See `docs/eval-results/README.md` |
+| 6 | Failure-injection tests and tracing | Built and tested |
+| 7 | UI polish, a real README, the prompt-history documentation | Built. This document, `README.md` and `PROMPTS.md` reflect it |
 
 Phase 1 was planned to use a deliberately tiny grammar first, with the full grammar in Phase 2.
 Since both were built together, the full grammar went in directly.
@@ -711,8 +760,9 @@ What has actually been measured, in `docs/spikes.md`:
 | `src/server/` | The Cloudflare layer: `index.ts` (Worker entry), `agent.ts` (`IncidentAgent`), `workflow.ts` (`InvestigationWorkflow`), `store.ts` (SQLite) |
 | `ui/` | The React page |
 | `prompts/` | The prompt templates, as plain text files |
-| `test/unit/`, `test/integration/` | 159 fast tests of the core, and 14 tests of the real Agent and Workflow running in Cloudflare's local runtime |
-| `spikes/`, `scripts/` | Tools for the measurements that need a Cloudflare account |
+| `src/eval/` | The eval harness and its response cache (Phase 5) |
+| `test/unit/`, `test/integration/` | 204 fast tests of the core, and 40 tests of the real Agent and Workflow running in Cloudflare's local runtime, including the Phase 6 failure-injection suite |
+| `spikes/`, `scripts/` | Tools for the measurements that need a Cloudflare account, and the eval harness's CLI driver |
 
 ---
 
