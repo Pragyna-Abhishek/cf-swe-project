@@ -131,7 +131,7 @@ async function structured(seedsPerShape: number) {
   for (const shape of shapes) {
     for (let s = 1; s <= seedsPerShape; s++) {
       const traffic = generateAll(shape.def, s);
-      const summary = finalizeSummary(aggregateChunk(traffic, shape.def.scenario.durationMs), traffic.dictionary);
+      const summary = finalizeSummary(aggregateChunk(traffic, shape.def.scenario.durationMs, shape.def.scenario.symptomStatus), traffic.dictionary);
       const prompt = buildDraftRulePrompt(templates, { symptom: shape.symptom, summary });
       const r = (await (
         await fetch(url("/model/run"), {

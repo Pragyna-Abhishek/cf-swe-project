@@ -1,9 +1,12 @@
 // InvestigationWorkflow. The sequence is fixed in code; the model decides nothing about which
-// steps run. DESIGN.md section 8 has the full table. Phase 1 runs one draft attempt; the
-// bounded retry loop is Phase 3.
+// steps run. DESIGN.md section 8 has the full table. Steps 6, 7 and 8 are a bounded retry loop
+// (Phase 3): up to MAX_DRAFT_ATTEMPTS drafts, diagnostics from a failed attempt fed back into
+// the next prompt, every attempt persisted as its own RuleVersion.
 //
 // Determinism rules this file obeys (Rules of Workflows):
-//   - Step names are constants. The attempt number in a name comes from a constant.
+//   - Step names are constants, or derived from `attempt`, which is bounded by the constant
+//     MAX_DRAFT_ATTEMPTS and driven by a plain `for` loop -- never by model output. CLAUDE.md
+//     invariant 12.
 //   - Every value that crosses a step boundary is a step return: IDs, digests, counts, and one
 //     summary. Never traffic. CLAUDE.md invariant 9.
 //   - No Date.now() or randomness outside steps. The seed comes from the payload.
@@ -11,7 +14,8 @@
 import { AgentWorkflow, WorkflowRejectedError, type AgentWorkflowEvent, type AgentWorkflowStep } from "agents/workflows";
 import { NonRetryableError } from "cloudflare:workflows";
 import { planChunks } from "../core/chunks";
-import { buildDraftRulePrompt } from "../core/prompt";
+import { CLASSIFY_JSON_SCHEMA, HYPOTHESIZE_JSON_SCHEMA, WRITE_REPORT_JSON_SCHEMA } from "../core/narrative-schema";
+import { buildClassifyPrompt, buildDraftRulePrompt, buildHypothesizePrompt, buildReportPrompt, MAX_DRAFT_ATTEMPTS, type PriorAttempt } from "../core/prompt";
 import { toReplayResult } from "../core/replay";
 import { mergeChunkReplays, type ChunkReplay } from "../core/rules/evaluate";
 import { RULE_JSON_SCHEMA } from "../core/rules/schema";
@@ -19,15 +23,20 @@ import { findScenario } from "../core/scenarios";
 import type { ReplayResult, RuleVersionStatus, TrafficSummary } from "../core/types";
 import type { IncidentAgent } from "./agent";
 import { modelFor } from "./model";
-import { DRAFT_RULE_TEMPLATES } from "./prompts";
+import { CLASSIFY_SYMPTOM_TEMPLATES, DRAFT_RULE_TEMPLATES, HYPOTHESIZE_TEMPLATES, WRITE_REPORT_TEMPLATES } from "./prompts";
 import type { InvestigationParams } from "./views";
 
 export const STEP = {
   ensureTraffic: "ensure-traffic",
   aggregateTraffic: "aggregate-traffic",
-  draftRule: "draft-rule-attempt-1",
-  validateRule: "validate-rule-attempt-1",
-  replayRule: "replay-rule-attempt-1",
+  loadMemory: "load-memory",
+  classifySymptom: "classify-symptom",
+  hypothesize: "hypothesize",
+  writeReport: "write-report",
+  draftRule: (i: number) => `draft-rule-attempt-${i}`,
+  validateRule: (i: number) => `validate-rule-attempt-${i}`,
+  draftFeedback: (i: number) => `draft-feedback-attempt-${i}`,
+  replayRule: (i: number) => `replay-rule-attempt-${i}`,
   baselineRule: "naive-baseline",
   replayBaseline: "replay-naive-baseline",
   failIncident: "fail-incident",
@@ -39,14 +48,14 @@ export const STEP = {
   persistIncident: "persist-incident",
 } as const;
 
-const ATTEMPT = 1;
-
 // Step results are plain data. RPC results arrive branded Disposable, which a step cannot
 // serialize, so every tracked step names its plain result type explicitly.
 type TrafficDigest = { digest: string; count: number; chunks: number };
 type Validation = { status: RuleVersionStatus; diagnosticCodes: string[] };
 type Applied = { ruleVersionId: string };
 const APPROVAL_TIMEOUT = "7 days";
+/** roundtrip-failed means our printer and parser disagree: our bug, never worth retrying. */
+const HARD_FAILURE: RuleVersionStatus = "roundtrip-failed";
 
 // Retry policies from DESIGN.md section 8.
 const cpuHeavy = { retries: { limit: 3, delay: "2 seconds", backoff: "exponential" }, timeout: "5 minutes" } as const;
@@ -86,6 +95,9 @@ export class InvestigationWorkflow extends AgentWorkflow<IncidentAgent, Investig
     );
 
     // 4. Summaries only. This is the whole of what the model will see about traffic.
+    // Runs before steps 2 and 3 below: both need the summary (its "signals", or its evidence
+    // IDs), which does not exist yet at DESIGN.md section 8's original step numbering. Recorded
+    // there as a correction, the same way the retry loop's exit condition was.
     const summary = await step.do(STEP.aggregateTraffic, cpuHeavy, () =>
       tracked<TrafficSummary>(
         STEP.aggregateTraffic,
@@ -94,30 +106,99 @@ export class InvestigationWorkflow extends AgentWorkflow<IncidentAgent, Investig
       ),
     );
 
-    // 6. One draft. Rate limits and transport errors throw, so the step retries with backoff.
-    const draftId = await step.do(STEP.draftRule, modelCall, () =>
-      tracked<string>(STEP.draftRule, async () => {
-        const model = modelFor(this.env);
-        const prompt = buildDraftRulePrompt(DRAFT_RULE_TEMPLATES, { symptom: p.symptom, summary });
-        const response = await model.generateJson({ ...prompt, purpose: "draft-rule", jsonSchema: RULE_JSON_SCHEMA });
-        if (response.kind === "rate-limited" || response.kind === "error") {
-          throw new Error(`model call failed (${response.kind}): ${response.message}`);
-        }
-        return agent.recordDraft(p.incidentId, ATTEMPT, response);
-      }),
-    );
-
-    // 7. Schema, limits, types, print, parse, round trip.
-    const validation = await step.do(STEP.validateRule, cheap, () =>
-      tracked<Validation>(
-        STEP.validateRule,
-        () => agent.validateRuleVersion(draftId),
-        (v) => (v.diagnosticCodes.length ? `${v.status}: ${v.diagnosticCodes.join(", ")}` : v.status),
+    // 2. Prior lessons for this scenario's family, if any.
+    const memory = await step.do(STEP.loadMemory, cheap, () =>
+      tracked<{ lessons: string[] }>(
+        STEP.loadMemory,
+        () => agent.loadMemory(p.scenarioId, p.incidentId),
+        (m) => (m.lessons.length ? `${m.lessons.length} prior lesson(s)` : "no prior lessons"),
       ),
     );
 
+    // 3. Classify the symptom into a fixed enum. Informational only: it shapes the hypothesize
+    // prompt below and nothing else, so a bad classification degrades gracefully.
+    const classification = await step.do(STEP.classifySymptom, modelCall, () =>
+      tracked<{ intent: string }>(
+        STEP.classifySymptom,
+        async () => {
+          const model = modelFor(this.env);
+          const prompt = buildClassifyPrompt(CLASSIFY_SYMPTOM_TEMPLATES, { symptom: p.symptom, signals: summary.signals });
+          const response = await model.generateJson({ ...prompt, purpose: "classify-symptom", jsonSchema: CLASSIFY_JSON_SCHEMA });
+          return agent.classifySymptom(response);
+        },
+        (c) => c.intent,
+      ),
+    );
+
+    // 5. A hypothesis citing evidence IDs. A fabricated citation is caught and surfaced (the
+    // step's own recorded detail says so), never rendered as if it were backed by data.
+    const hypothesis = await step.do(STEP.hypothesize, modelCall, () =>
+      tracked<{ hypothesis: string | null; fabricatedCitations: string[] }>(
+        STEP.hypothesize,
+        async () => {
+          const model = modelFor(this.env);
+          const prompt = buildHypothesizePrompt(HYPOTHESIZE_TEMPLATES, {
+            symptom: p.symptom,
+            intent: classification.intent,
+            summary,
+            lessons: memory.lessons,
+          });
+          const response = await model.generateJson({ ...prompt, purpose: "hypothesize", jsonSchema: HYPOTHESIZE_JSON_SCHEMA });
+          return agent.hypothesize(p.incidentId, response);
+        },
+        (h) => (h.fabricatedCitations.length ? `rejected: fabricated citations ${h.fabricatedCitations.join(", ")}` : (h.hypothesis ?? "none")),
+      ),
+    );
+    void hypothesis;
+
+    // 6, 7, 8 (loop). Up to MAX_DRAFT_ATTEMPTS drafts. A schema or type failure feeds its
+    // diagnostics back into the next attempt's prompt and retries; a roundtrip failure is our
+    // bug and is never retried; exhausting every attempt fails the incident visibly.
+    let draftId: string | null = null;
+    let validation: Validation | null = null;
+    let finalAttempt = 1;
+    let priorAttempts: PriorAttempt[] = [];
+    for (let attempt = 1; attempt <= MAX_DRAFT_ATTEMPTS; attempt++) {
+      finalAttempt = attempt;
+      const draftName = STEP.draftRule(attempt);
+      const attemptDraftId = await step.do(draftName, modelCall, () =>
+        tracked<string>(draftName, async () => {
+          const model = modelFor(this.env);
+          const prompt = buildDraftRulePrompt(DRAFT_RULE_TEMPLATES, { symptom: p.symptom, summary, priorAttempts });
+          const response = await model.generateJson({ ...prompt, purpose: "draft-rule", jsonSchema: RULE_JSON_SCHEMA });
+          if (response.kind === "rate-limited" || response.kind === "error") {
+            throw new Error(`model call failed (${response.kind}): ${response.message}`);
+          }
+          return agent.recordDraft(p.incidentId, attempt, response);
+        }),
+      );
+      draftId = attemptDraftId;
+
+      const validateName = STEP.validateRule(attempt);
+      const attemptValidation = await step.do(validateName, cheap, () =>
+        tracked<Validation>(
+          validateName,
+          () => agent.validateRuleVersion(attemptDraftId),
+          (v) => (v.diagnosticCodes.length ? `${v.status}: ${v.diagnosticCodes.join(", ")}` : v.status),
+        ),
+      );
+      validation = attemptValidation;
+
+      if (attemptValidation.status === "valid" || attemptValidation.status === HARD_FAILURE) break;
+      if (attempt === MAX_DRAFT_ATTEMPTS) break;
+
+      // Feed this attempt's raw output and diagnostics back into the next prompt.
+      const feedbackName = STEP.draftFeedback(attempt);
+      const feedback = await step.do(feedbackName, cheap, () =>
+        tracked<PriorAttempt>(feedbackName, () => agent.draftFeedback(attemptDraftId)),
+      );
+      priorAttempts = [...priorAttempts, feedback];
+    }
+    if (!draftId || !validation) throw new Error("unreachable: loop always runs at least once");
+
     if (validation.status !== "valid") {
-      // No retry loop in Phase 1: a failed draft fails the incident, visibly, with its reason.
+      // All attempts exhausted, or a hard (roundtrip) failure: fail the incident, visibly, with
+      // every attempt already persisted (RuleVersion rows) and the reason it stopped.
       await step.do(STEP.failIncident, cheap, () =>
         tracked<string>(STEP.failIncident, async () => {
           await agent.markIncident(p.incidentId, "failed", `draft ${validation.status}: ${validation.diagnosticCodes.join(", ")}`);
@@ -138,8 +219,10 @@ export class InvestigationWorkflow extends AgentWorkflow<IncidentAgent, Investig
       return merged;
     };
 
-    await step.do(STEP.replayRule, cpuHeavy, () =>
-      tracked<ReplayResult>(STEP.replayRule, async () => agent.recordReplay(draftId, await replayAll(draftId, false)), describeReplay),
+    const finalDraftId = draftId;
+    const replayName = STEP.replayRule(finalAttempt);
+    const proposedReplay = await step.do(replayName, cpuHeavy, () =>
+      tracked<ReplayResult>(replayName, async () => agent.recordReplay(finalDraftId, await replayAll(finalDraftId, false)), describeReplay),
     );
 
     const baselineId = await step.do(STEP.baselineRule, cheap, () =>
@@ -154,7 +237,7 @@ export class InvestigationWorkflow extends AgentWorkflow<IncidentAgent, Investig
     // 9. Ask the human.
     await step.do(STEP.publishProposal, cheap, () =>
       tracked<string>(STEP.publishProposal, async () => {
-        const status = await agent.publishProposal(p.incidentId, draftId, baselineId);
+        const status = await agent.publishProposal(p.incidentId, finalDraftId, baselineId);
         await agent.recordStep(p.incidentId, STEP.waitForApproval, "waiting", "waiting for the operator");
         return status;
       }),
@@ -201,6 +284,21 @@ export class InvestigationWorkflow extends AgentWorkflow<IncidentAgent, Investig
         STEP.verifyRecovery,
         async () => toReplayResult((await replayAll(applied.ruleVersionId, true)).counts, def.scenario.thresholds, "ev_recovery"),
         describeReplay,
+      ),
+    );
+
+    // 13. Report and lesson. The lesson is persisted for later investigations in this family.
+    await step.do(STEP.writeReport, modelCall, () =>
+      tracked<{ report: string | null; lesson: string | null }>(
+        STEP.writeReport,
+        async () => {
+          const model = modelFor(this.env);
+          const outcome = { proposedRule: describeReplay(proposedReplay), recovery: describeReplay(recovery), approved: true };
+          const prompt = buildReportPrompt(WRITE_REPORT_TEMPLATES, { symptom: p.symptom, hypothesis: hypothesis.hypothesis, outcome });
+          const response = await model.generateJson({ ...prompt, purpose: "write-report", jsonSchema: WRITE_REPORT_JSON_SCHEMA });
+          return agent.writeReport(p.incidentId, response);
+        },
+        (r) => r.lesson ?? "no lesson recorded",
       ),
     );
 

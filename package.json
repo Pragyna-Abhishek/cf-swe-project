@@ -13,6 +13,7 @@
     "test:integration": "vitest run --config vitest.integration.config.ts --max-workers=1 --no-isolate",
     "coverage": "vitest run --config vitest.config.ts --coverage",
     "bench": "vitest run --config vitest.bench.config.ts",
+    "eval": "node scripts/run-eval.mjs",
     "cf-typegen": "wrangler types --include-runtime=false --strict-vars=false"
   },
   "dependencies": {

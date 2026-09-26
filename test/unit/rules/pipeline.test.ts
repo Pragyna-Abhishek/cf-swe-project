@@ -3,9 +3,13 @@ import { DIAGNOSTIC_CODES } from "../../../src/core/rules/diagnostics";
 import { parse } from "../../../src/core/rules/parser";
 import { checkRuleText, modelFailureOutcome, verifyAst, verifyModelDraft } from "../../../src/core/rules/pipeline";
 import { print } from "../../../src/core/rules/printer";
+import { encodeRuleAst } from "../../../src/core/rules/schema";
 import type { RuleAST } from "../../../src/core/types";
 
-const wrap = (rule: unknown) => JSON.stringify({ rule });
+/** Wraps a hand-written AST the way the model would emit it: flat, wrapped in {"rule": ...}. */
+const wrap = (ast: RuleAST) => JSON.stringify({ rule: encodeRuleAst(ast) });
+/** For cases that need a malformed flat body directly, not a valid AST. */
+const wrapRaw = (rule: unknown) => JSON.stringify({ rule });
 const good: RuleAST = {
   kind: "and",
   left: { kind: "compare", field: "http.request.uri.path", op: "eq", value: "/login" },
@@ -23,7 +27,10 @@ describe("verification pipeline", () => {
 
   it("schema failures are invalid-schema, with no AST and no text", () => {
     expect(verifyModelDraft("{")).toMatchObject({ status: "invalid-schema", ast: null, text: null });
-    expect(verifyModelDraft(wrap({ kind: "nope" }))).toMatchObject({ status: "invalid-schema", ast: null });
+    expect(verifyModelDraft(wrapRaw({ root: 0, nodes: [{ id: 0, kind: "nope" }] }))).toMatchObject({
+      status: "invalid-schema",
+      ast: null,
+    });
   });
 
   it("limit failures are invalid-schema, refused before printing", () => {
@@ -33,12 +40,16 @@ describe("verification pipeline", () => {
   });
 
   it("type failures are invalid-types, still printed so the operator can see them, with spans", () => {
-    const out = verifyModelDraft(wrap({ kind: "compare", field: "ip.src.asnum", op: "eq", value: "64500" }));
+    // The wire schema ties a leaf's kind (compareString/compareNumber) to its field's type, so a
+    // string-vs-number field/value mismatch is now caught at decode (invalid-schema), earlier
+    // than the type checker. A number field's literal still needs its own range checked, which
+    // the schema does not encode: http.response.code is a valid integer here, just out of range.
+    const out = verifyModelDraft(wrap({ kind: "compare", field: "http.response.code", op: "eq", value: 900 }));
     expect(out.status).toBe("invalid-types");
-    expect(out.text).toBe('ip.src.asnum eq "64500"');
+    expect(out.text).toBe("http.response.code eq 900");
     const d = out.diagnostics[0];
-    expect(d?.code).toBe("E_TYPE_MISMATCH");
-    expect(d?.span && out.text?.slice(d.span.start, d.span.end)).toBe('"64500"');
+    expect(d?.code).toBe("E_NUMBER_OUT_OF_RANGE");
+    expect(d?.span && out.text?.slice(d.span.start, d.span.end)).toBe("900");
   });
 
   it("warnings alone leave a rule valid", () => {

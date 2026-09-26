@@ -6,6 +6,7 @@
 
 import { useAgent } from "agents/react";
 import { useEffect, useMemo, useState } from "react";
+import { SCENARIOS } from "../../src/core/scenarios";
 import type { Diagnostic, ReplayResult, RuleVersion, TrafficSummary } from "../../src/core/types";
 import type { IncidentAgent } from "../../src/server/agent";
 import type { AgentState, IncidentView, TrafficState } from "../../src/server/views";
@@ -58,7 +59,26 @@ export function App() {
         <h1>Portcullis</h1>
         <p className="tagline">The model proposes. Code verifies. You decide.</p>
         <div className="scenario">
-          Scenario: <strong>{state.scenario.title}</strong>
+          Scenario:{" "}
+          <select
+            value={state.scenario.id}
+            disabled={state.incidents.some((i) => i.status === "investigating" || i.status === "awaiting-approval")}
+            onChange={async (e) => {
+              setError(null);
+              setSelectedId(null);
+              try {
+                await agent.stub.selectScenario(e.target.value);
+              } catch (err) {
+                setError(err instanceof Error ? err.message : String(err));
+              }
+            }}
+          >
+            {SCENARIOS.map((d) => (
+              <option key={d.scenario.id} value={d.scenario.id}>
+                {d.scenario.title}
+              </option>
+            ))}
+          </select>
           {state.scenario.isTrap && <span className="pill">trap: shared {state.scenario.trapAttribute}</span>}
         </div>
       </header>
@@ -235,11 +255,13 @@ function IncidentPanel({
         Symptom: "{incident.symptom}". Model: <code>{incident.modelId}</code>
       </p>
       {incident.failureReason && <p className="error">{incident.failureReason}</p>}
+      {incident.hypothesis && <Cited className="hypothesis" label="Hypothesis" text={incident.hypothesis} />}
       <Steps incident={incident} />
       <div className="rules">
         <RuleCard title="Proposed rule (model draft, verified in code)" version={incident.proposed} thresholds={thresholds} />
         <RuleCard title="Naive baseline (block the top source attribute)" version={incident.baseline} thresholds={thresholds} />
       </div>
+      {incident.attempts.length > 1 && <AttemptHistory attempts={incident.attempts} />}
       {awaiting && (
         <div className="decision">
           <button className="approve" onClick={onApprove}>
@@ -257,6 +279,8 @@ function IncidentPanel({
           <Counts replay={incident.recovery} />
         </div>
       )}
+      {incident.report && <Cited className="report" label="Report" text={incident.report} />}
+      {incident.lesson && <Cited className="lesson" label="Lesson learned" text={incident.lesson} />}
       {incident.summary && <Evidence summary={incident.summary} />}
     </section>
   );
@@ -273,6 +297,25 @@ function Steps({ incident }: { incident: IncidentView }) {
         </li>
       ))}
     </ol>
+  );
+}
+
+/** Every draft attempt, so a reviewer can see what was rejected and why (Phase 3). */
+function AttemptHistory({ attempts }: { attempts: RuleVersion[] }) {
+  return (
+    <details className="attempt-history">
+      <summary>Attempt history ({attempts.length} attempt{attempts.length === 1 ? "" : "s"})</summary>
+      <ol>
+        {attempts.map((a) => (
+          <li key={a.id} className={`status status-${a.status}`}>
+            <span className="step-name">attempt {a.attempt}</span>
+            <span className="step-status">{a.status}</span>
+            {a.text && <pre className="rule-text">{a.text}</pre>}
+            {a.diagnostics.length > 0 && <Diagnostics text={a.text} diagnostics={a.diagnostics} />}
+          </li>
+        ))}
+      </ol>
+    </details>
   );
 }
 
@@ -351,18 +394,75 @@ function Diagnostics({ text, diagnostics }: { text: string | null; diagnostics: 
   );
 }
 
+const CITATION_TOKEN = /\bev_[a-zA-Z0-9_]+\b/g;
+
+/** Renders text with every `ev_...` citation as a link to that evidence record's anchor. */
+function Cited({ className, label, text }: { className: string; label: string; text: string }) {
+  const parts: Array<string | { citation: string }> = [];
+  let lastIndex = 0;
+  for (const match of text.matchAll(CITATION_TOKEN)) {
+    const start = match.index ?? 0;
+    if (start > lastIndex) parts.push(text.slice(lastIndex, start));
+    parts.push({ citation: match[0] });
+    lastIndex = start + match[0].length;
+  }
+  if (lastIndex < text.length) parts.push(text.slice(lastIndex));
+  return (
+    <div className={className}>
+      <h3>{label}</h3>
+      <p>
+        {parts.map((p, i) =>
+          typeof p === "string" ? (
+            <span key={i}>{p}</span>
+          ) : (
+            <a key={i} href={`#${p.citation}`}>
+              {p.citation}
+            </a>
+          ),
+        )}
+      </p>
+    </div>
+  );
+}
+
 function Evidence({ summary }: { summary: TrafficSummary }) {
   return (
     <details className="evidence">
       <summary>Evidence: the label-blind summary the model saw ({summary.totalRequests} requests)</summary>
       <div className="breakdowns">
-        {[...summary.breakdowns, ...summary.symptomSlice.breakdowns]
+        {summary.breakdowns
           .filter((b) => b.dimension !== "timeBucket")
           .map((b) => (
-            <div key={b.evidenceId} className="breakdown">
+            <div key={b.evidenceId} id={b.evidenceId} className="breakdown">
               <h4>
                 <code>{b.evidenceId}</code> {b.dimension}
-                {Number(b.evidenceId.slice(3)) > 7 ? " (401 responses only)" : ""}
+              </h4>
+              <table>
+                <tbody>
+                  {b.rows.map((r) => (
+                    <tr key={r.key}>
+                      <td className="key">{r.key}</td>
+                      <td>{r.count}</td>
+                      <td>{pct(r.share)}</td>
+                    </tr>
+                  ))}
+                  {b.otherCount > 0 && (
+                    <tr>
+                      <td className="muted">other</td>
+                      <td>{b.otherCount}</td>
+                      <td />
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          ))}
+        {summary.symptomSlice.breakdowns
+          .filter((b) => b.dimension !== "timeBucket")
+          .map((b) => (
+            <div key={b.evidenceId} id={b.evidenceId} className="breakdown">
+              <h4>
+                <code>{b.evidenceId}</code> {b.dimension} ({summary.symptomSlice.description})
               </h4>
               <table>
                 <tbody>

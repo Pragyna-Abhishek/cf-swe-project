@@ -1,5 +1,7 @@
 // Fake ModelClient for tests, local development without credentials, and the eval harness.
 
+import { print } from "../core/rules/printer";
+import { encodeRuleAst } from "../core/rules/schema";
 import type { RuleAST } from "../core/types";
 import type { ModelClient, ModelRequest, ModelResponse } from "./client";
 
@@ -39,6 +41,32 @@ export const CANNED_RULE: RuleAST = {
   },
 };
 
+/** A canned response for every purpose, since one FakeModelClient instance now serves all of
+ * them across a single investigation (classify, hypothesize, draft, write-report). */
 export function cannedModel(): FakeModelClient {
-  return new FakeModelClient([JSON.stringify({ rule: CANNED_RULE })], "fake");
+  return new FakeModelClient((request) => {
+    switch (request.purpose) {
+      case "draft-rule":
+        return { kind: "ok", raw: JSON.stringify({ rule: encodeRuleAst(CANNED_RULE) }) };
+      case "draft-rule-text":
+        return { kind: "ok", raw: JSON.stringify({ rule: print(CANNED_RULE).text }) };
+      case "classify-symptom":
+        return { kind: "ok", raw: JSON.stringify({ intent: "credential-stuffing" }) };
+      case "hypothesize":
+        return {
+          kind: "ok",
+          raw: JSON.stringify({
+            hypothesis: "Credential stuffing traffic is concentrated on the login endpoint, sharing a carrier ASN with real customers (ev_4).",
+          }),
+        };
+      case "write-report":
+        return {
+          kind: "ok",
+          raw: JSON.stringify({
+            report: "Credential stuffing against the login endpoint was investigated and a rule was proposed that separates the attack from legitimate traffic on the same network.",
+            lesson: "A shared ASN between attack and legitimate traffic needs a more specific rule than blocking the network alone.",
+          }),
+        };
+    }
+  }, "fake");
 }

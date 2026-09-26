@@ -1,0 +1,54 @@
+{
+  "measuredAt": "2026-09-25T21:42:25.127Z",
+  "ladder": [
+    {
+      "iters": 250000,
+      "ok": true
+    },
+    {
+      "iters": 500000,
+      "ok": true
+    },
+    {
+      "iters": 1000000,
+      "ok": true
+    },
+    {
+      "iters": 2000000,
+      "ok": true
+    },
+    {
+      "iters": 4000000,
+      "ok": true
+    },
+    {
+      "iters": 8000000,
+      "ok": true
+    },
+    {
+      "iters": 16000000,
+      "ok": true
+    },
+    {
+      "iters": 32000000,
+      "ok": true
+    },
+    {
+      "iters": 64000000,
+      "ok": true
+    },
+    {
+      "iters": 128000000,
+      "ok": true
+    },
+    {
+      "iters": 256000000,
+      "ok": true
+    },
+    {
+      "iters": 512000000,
+      "ok": true
+    }
+  ],
+  "conclusion": "no single-call failure found; CPU limit not reached"
+}

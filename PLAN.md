@@ -13,10 +13,13 @@ cannot be verified by running something, it is not a criterion.
 
 | Phase | State | What is left |
 | --- | --- | --- |
-| 0 | Partly done | 0.3 measured locally (`docs/spikes.md`). 0.1, 0.2 and 0.4 need the account: deploy `spikes/` and run `scripts/run-spikes.mjs` |
-| 1 | Built, tested locally | Deploy to `workers.dev` and run the 60 second demo against the deployed URL. The model's rule on the trap scenario is not yet measured (0.4) |
+| 0 | All four spikes measured (`docs/spikes.md`); 0.4 measured **negative**, two fallbacks attempted | Fallback 1 (flatten the schema) measured, still fails. Fallback 2 (split leaf kinds by value type) implemented and unit-tested, **not yet re-measured**: the account's daily free neuron allocation was exhausted verifying fallback 1. Re-run `structured` once it resets |
+| 1 | Built, tested locally, deployed | `https://portcullis.pragyna-portcullis.workers.dev` is live and serving. The 60-second demo has not yet been driven against the deployed URL in a browser. The model's rule step is expected to keep failing visibly on this account until 0.4's fallback 2 is re-measured and confirmed (see Phase 0) |
 | 2 | Built, tested | Abhishek to review the grammar in DESIGN.md section 7 |
-| 3 to 7 | Not started | |
+| 3 | Built, tested (fake model only; not yet exercised against the real model, see Phase 0) | Bounded retry loop, diagnostics feedback, attempt history all implemented (`src/server/workflow.ts`, `src/core/prompt.ts`). Real-model behavior under retry is unverified until 0.4 is resolved |
+| 4 | Built, tested (fake model only; not yet exercised against the real model, see Phase 0) | 8 scenarios across 3 families (3 traps: asn, country, userAgent) in `src/core/scenarios.ts`. Evidence ledger (`evidence` table), citation checking (`src/core/citations.ts`), memory (`lessons` table, retrieved per scenario family), classify/hypothesize/write-report steps, retention pruning of `cf_agents_workflows`, and UI display of hypothesis/report/lesson with clickable evidence citations are all implemented and tested. All five Phase 4 acceptance criteria have a passing test (`test/unit/scenarios-all.test.ts`, `test/unit/citations.test.ts`, `test/integration/workflow.test.ts`) |
+| 5 | Built, tested (fake model only; `--real` implemented and smoke-tested, not measured, see Phase 0) | `npm run eval` (`src/eval/harness.ts`, `scripts/eval-driver.ts`) runs the full pipeline plus all four ablations (no retry loop, no memory, naive baseline, text-vs-AST) across all 8 scenarios, against the fake model with no credentials, or the real model via `--real` (the deployed spikes Worker's `/model/run`). Response cache (`src/eval/cache.ts`) keyed by `(scenario, prompt, model)`, tested for hit/miss/no-cache-on-failure (`test/unit/eval-harness.test.ts`). Reproducibility confirmed: two consecutive fake runs are byte-identical, second run all cache hits. `docs/eval-results/fake.json` committed; `real.json` withheld because the account's daily Workers AI neuron quota is exhausted (confirmed by a fresh probe), so no real-model number can be honestly reported today — see `docs/eval-results/README.md` |
+| 6 to 7 | Not started | |
 
 Deviations from this plan, on purpose:
 

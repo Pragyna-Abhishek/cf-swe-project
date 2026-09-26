@@ -38,6 +38,8 @@ export type PartialAggregate = {
   scenarioId: string;
   seed: number;
   durationMs: number;
+  /** The scenario's symptom status. `symptom` below is requests matching this status. */
+  symptomStatus: number;
   all: DimensionCounts;
   symptom: DimensionCounts;
   /** panel[bucket][statusClass] */
@@ -71,7 +73,7 @@ export function emptyPanel(): number[][] {
 }
 
 /** One pass over one chunk. Bounded by chunk size, so it fits one CPU slice. */
-export function aggregateChunk(t: ColumnarTraffic, durationMs: number): PartialAggregate {
+export function aggregateChunk(t: ColumnarTraffic, durationMs: number, symptomStatus: number = SYMPTOM_STATUS): PartialAggregate {
   const all = emptyCounts(t);
   const symptom = emptyCounts(t);
   const panel = emptyPanel();
@@ -93,11 +95,11 @@ export function aggregateChunk(t: ColumnarTraffic, durationMs: number): PartialA
     const bucket = bucketOf(t.offsetMs[i] ?? 0, durationMs);
     const status = t.status[i] ?? 0;
     bump(all, i, bucket);
-    if (status === SYMPTOM_STATUS) bump(symptom, i, bucket);
+    if (status === symptomStatus) bump(symptom, i, bucket);
     const row = panel[bucket];
     if (row) inc(row, statusClassIndex(status));
   }
-  return { scenarioId: t.scenarioId, seed: t.seed, durationMs, all, symptom, panel };
+  return { scenarioId: t.scenarioId, seed: t.seed, durationMs, symptomStatus, all, symptom, panel };
 }
 
 function addArrays(a: number[], b: readonly number[]): number[] {
@@ -232,13 +234,13 @@ export function finalizeSummary(p: PartialAggregate, dictionary: ColumnarTraffic
     totalRequests: total,
     breakdowns: breakdownsFor(p.all, { dictionary }, p.durationMs, "all"),
     symptomSlice: {
-      description: `requests that returned HTTP ${SYMPTOM_STATUS}`,
+      description: `requests that returned HTTP ${p.symptomStatus}`,
       totalRequests: p.symptom.total,
       breakdowns: breakdownsFor(p.symptom, { dictionary }, p.durationMs, "symptom"),
     },
     signals: {
       errorRate: share(errors),
-      status401Share: share(p.all.status["401"] ?? 0),
+      symptomStatusShare: share(p.all.status[String(p.symptomStatus)] ?? 0),
       status429Share: share(p.all.status["429"] ?? 0),
     },
   };

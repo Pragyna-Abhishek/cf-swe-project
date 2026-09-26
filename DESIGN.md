@@ -74,8 +74,12 @@ build has a target.
 The percentages above were placeholders written before implementation. Measured since, on the
 simulator for the committed scenario and seed (docs/spikes.md): the naive rule blocks 62.3% of
 attack and **46.3% of legitimate** traffic. A precise hand-written rule blocks 100% and 0%. What the
-real model's rule achieves is UNVERIFIED until spike 0.4 runs on the account. The demo with the fake
-model runs end to end locally today; the "hypothesis" and "report and lesson" beats are Phase 4.
+real model's rule achieves is measured now (docs/spikes.md, 0.4), and it is a negative result: 0/30
+attempts against the real model produced valid JSON at all, so no real-model rule has yet passed
+replay. The AST-as-nested-JSON-Schema encoding needs a fallback (PLAN.md's ordered list, starting
+with flattening the schema) before this demo beat is achievable with the real model. The demo with
+the fake model runs end to end locally today; the "hypothesis" and "report and lesson" beats are
+Phase 4.
 
 ## 4. Architecture
 
@@ -205,11 +209,13 @@ Two chunk drivers exist. On page load the browser calls `generateTrafficChunk` o
 the WebSocket; the docs say each WebSocket message refreshes the budget. Inside the investigation,
 Workflow steps loop over chunks calling the Agent over Durable Object RPC.
 
-UNVERIFIED, and Phase 0 spike 0.2 must measure it on the account: the second driver relies on a
-**Durable Object RPC call counting as an incoming request that refreshes the CPU budget**. The docs
-say the budget is refreshed by "each incoming HTTP request or WebSocket message" and do not state
-whether a plain RPC method call qualifies. If it does not, the Workflow's chunk loops switch to
-`fetch()` on the Agent stub. The spike Worker in `spikes/` measures exactly this.
+Measured on the account (docs/spikes.md, 0.2): a single Durable Object RPC call to a CPU-burning
+method did not trigger `exceededCpu` at up to 512,000,000 loop iterations, well beyond what a real
+chunk call does. No measurement forced a change away from RPC. This does not fully confirm the
+original question (whether RPC specifically gets its own refreshed budget, as opposed to the account
+simply not being CPU-limited at 10 ms on this call path) — see docs/spikes.md for the two
+explanations left open. If `exceededCpu` appears in production logs, the Workflow's chunk loops
+switch to `fetch()` on the Agent stub instead; that is a change to `src/server/workflow.ts` only.
 
 Fallback if generation cannot be made to fit even when chunked: precompute scenarios at build time.
 The simulator is a pure seeded function, so build-time generation is equivalent by construction,
@@ -338,6 +344,13 @@ export type Scenario = {
   requestCount: number;
   /** Scenario length in milliseconds. Offsets fall in [0, durationMs). */
   durationMs: number;
+  /**
+   * The HTTP status that marks "the symptom" for this scenario: 401 for a credential-stuffing
+   * scenario (failed logins), 503 for an l7-flood scenario (origin overload), 404 for a scraper
+   * scenario (enumerating IDs that mostly don't exist). Never the ground truth label; purely a
+   * status code an operator could report without knowing which requests are the attack.
+   */
+  symptomStatus: number;
   /** Pass and fail thresholds for this scenario. See DESIGN.md section 9. */
   thresholds: {
     minAttackBlockedRate: number;
@@ -377,7 +390,7 @@ export type TrafficSummary = {
   totalRequests: number;
   breakdowns: Breakdown[];
   /**
-   * The same breakdowns restricted to the requests that show the symptom (status 401).
+   * The same breakdowns restricted to the requests that show the symptom (the scenario's symptomStatus).
    * Computed from status alone, never from the ground truth label.
    */
   symptomSlice: {
@@ -388,7 +401,8 @@ export type TrafficSummary = {
   /** Aggregate signals the symptom classifier uses. */
   signals: {
     errorRate: number;
-    status401Share: number;
+    /** Share of all requests returning the scenario's symptomStatus. */
+    symptomStatusShare: number;
     status429Share: number;
   };
 };
@@ -435,8 +449,13 @@ export type Evidence = {
   claim: string;
   /** Which deterministic tool produced it. */
   producedBy: string;
-  /** Small serialized payload. Never raw requests. */
-  data: unknown;
+  /**
+   * Small serialized payload, never raw requests. Typed as a concrete union rather than
+   * `unknown`: the Agent SDK's RPC stub typing collapses a state shape containing `unknown` to
+   * `never`, which silently breaks every `agent.state` access at every call site, not just this
+   * one (measured while wiring the evidence ledger into AgentState in Phase 4).
+   */
+  data: Breakdown | ReplayResult;
   createdAt: number;
 };
 
@@ -691,18 +710,18 @@ params or step returns, which keeps both under the 1 MiB ceilings.
 Idempotency keys are the step names, since Workflows caches step results by name and step names
 must be deterministic. All names are constants in `src/server/workflow.ts`.
 
-### As built in Phase 1
+### As built (Phase 1, retry loop added in Phase 3)
 
-Phase 1 runs one draft attempt; a failed draft fails the incident visibly. Hypothesis, memory and
-report steps (2, 3, 5, 13) are later phases.
+Hypothesis, memory and report steps (2, 3, 5, 13) are later phases, not built yet.
 
 | # | Step | Does | Returns | Retry policy |
 | --- | --- | --- | --- | --- |
 | 1 | `ensure-traffic` | Calls `ensureTrafficChunk` once per chunk (idempotent), then `trafficDigest` | digest, count, chunks | 3, 2 s, exponential |
 | 4 | `aggregate-traffic` | Merges the stored per-chunk partial aggregates into a `TrafficSummary` | `TrafficSummary` | 3, 2 s, exponential |
-| 6.1 | `draft-rule-attempt-1` | Builds the prompt from `prompts/`, calls the model, stores the raw output verbatim | rule version ID | 2, 5 s, exponential |
-| 7.1 | `validate-rule-attempt-1` | Runs the verification pipeline over the stored raw output | status, diagnostic codes | 3, 1 s, exponential |
-| 8.1 | `replay-rule-attempt-1` | Replays each chunk through the stored rule, merges the counts | `ReplayResult` | 3, 2 s, exponential |
+| 6.i | `draft-rule-attempt-{i}` | Builds the prompt (plus the previous attempt's raw output and diagnostics, for `i > 1`), calls the model, stores the raw output verbatim | rule version ID | 2, 5 s, exponential |
+| 7.i | `validate-rule-attempt-{i}` | Runs the verification pipeline over the stored raw output | status, diagnostic codes | 3, 1 s, exponential |
+| 6.5.i | `draft-feedback-attempt-{i}` | Only when attempt `i` failed and `i < MAX_DRAFT_ATTEMPTS`: reads back that attempt's raw output and diagnostics for the next prompt | raw output, diagnostics | 3, 1 s, exponential |
+| 8.i | `replay-rule-attempt-{i}` | Replays each chunk through the stored rule of the attempt the loop stopped on, merges the counts | `ReplayResult` | 3, 2 s, exponential |
 | 8b | `naive-baseline` | Builds the naive rule in code from the summary, verifies it the same way | rule version ID | 3, 1 s, exponential |
 | 8c | `replay-naive-baseline` | Same replay loop for the baseline | `ReplayResult` | 3, 2 s, exponential |
 | 9 | `publish-proposal` | Incident to `awaiting-approval` with `proposedRuleVersionId` set | status | 3, 1 s, exponential |
@@ -711,8 +730,21 @@ report steps (2, 3, 5, 13) are later phases.
 | 12 | `verify-recovery` | Re-parses the applied rule **from its stored text** and replays it | recovery `ReplayResult` | 3, 2 s, exponential |
 | 14 | `persist-incident` | Incident to `applied` with the recovery stored | digest | 3, 1 s, exponential |
 
-If validation fails, a `fail-incident` step marks the incident `failed` with the diagnostic codes
-and the workflow ends. If the approval times out, `mark-timed-out` marks it `timed-out`.
+**The retry loop (`src/server/workflow.ts`).** `i` runs from 1 to `MAX_DRAFT_ATTEMPTS` (3), a
+constant; the loop bound is never derived from model output (CLAUDE.md invariant 12). It exits as
+soon as attempt `i`'s validation status is `valid`, or is `roundtrip-failed` (our bug, never worth
+retrying: DESIGN deliberately does not retry a printer/parser disagreement). `invalid-schema` and
+`invalid-types` retry, feeding the failed attempt's raw output and diagnostics into the next
+attempt's prompt. If every attempt is exhausted without reaching `valid`, or the loop stopped on
+`roundtrip-failed`, `fail-incident` marks the incident `failed` with the last attempt's diagnostic
+codes and the workflow ends; every attempt made is still persisted as its own `RuleVersion` row
+(`attempt` 1..i), visible in the UI's attempt history. **Correction from the original plan:** the
+loop's exit condition here is validation status alone, not "reaches status `valid` **and** clears
+the scenario thresholds" as an earlier draft of this section said. A syntactically and type-valid
+rule that does not clear the thresholds is still proposed to the operator (as Phase 1 already did)
+rather than silently retried or discarded; PLAN.md's three named failure classes
+(`invalid-schema`/`invalid-types`/`roundtrip-failed`) are what the loop retries on, and threshold
+clearance was never one of them. If the approval times out, `mark-timed-out` marks it `timed-out`.
 
 Two corrections to the original plan, both from the docs and the SDK source:
 
@@ -727,19 +759,14 @@ Two corrections to the original plan, both from the docs and the SDK source:
 Step progress for the UI is written from inside each step's callback, so a replayed (cached) step
 does not report itself again.
 
-### Planned for Phase 3 onward
+### Planned for Phase 4 onward
 
 | # | Step | Input | Output | Retry policy | Idempotency key |
 | --- | --- | --- | --- | --- | --- |
 | 2 | `load-memory` | scenarioId family | prior lessons, evidence IDs | 3, 1 s, exponential | `load-memory` |
 | 3 | `classify-symptom` | symptom, signals | intent enum | 2, 5 s, exponential | `classify-symptom` |
 | 5 | `hypothesize` | summary, memory | hypothesis + cited evidence IDs | 2, 5 s, exponential | `hypothesize` |
-| 6.i, 7.i, 8.i | `draft-rule-attempt-{i}` and friends | as above, plus prior diagnostics | as above | as above | name with `i` |
 | 13 | `write-report` | everything above | report + lesson | 2, 5 s, exponential | `write-report` |
-
-Steps 6, 7 and 8 become the bounded retry loop. `i` runs from 1 to `MAX_DRAFT_ATTEMPTS` (3). The
-loop bound is a constant, so step names stay deterministic. The loop exits early on the first rule
-version that reaches status `valid` and clears the scenario thresholds.
 
 Steps 1, 4, 8 and 12 are the CPU-heavy ones. Each drives its work as a sequence of chunk calls into
 the Agent (step 4 merges partials stored at generation time, so its per-call work is small).
@@ -836,11 +863,17 @@ Run by the eval harness against the fake model and against the real one:
 The harness caches model responses by hash of `(scenario, prompt, model)` so re-runs and ablations
 are nearly free and reported metrics are reproducible. This matters because the Workers AI rate
 limit for text generation is 300 requests per minute by default, but 20 per minute for models that
-require the Workers Paid plan. Whether `@cf/meta/llama-3.3-70b-instruct-fp8-fast` is in that
-category is UNVERIFIED; the model reference pages are generated from a data source that is not in
-the docs repository, so it could not be read in this session. Phase 0 checks it against the account.
+require the Workers Paid plan. Measured on the account (docs/spikes.md, 0.1):
+`@cf/meta/llama-3.3-70b-instruct-fp8-fast` served 400/400 requests with zero rate-limiting at
+~15.3 req/s sustained, well above the 20/min figure for the Paid-only tier and consistent with the
+300/min default tier. The exact ceiling was not found (the spike never triggered a 429).
 
-**No metric in this document has been measured.** Every number here is a placeholder or a threshold.
+**No metric in this document has been measured against the real model.** Every number here is a
+placeholder or a threshold. The harness described above is built and has been run end to end
+against the fake model (`docs/eval-results/fake.json`), which validates the harness and the
+ablations mechanically but is not evaluation signal about the model: the fake model returns one
+fixed rule regardless of input. A real run (`npm run eval -- --real`) is blocked on the account's
+Workers AI daily neuron quota, exhausted as of this writing (docs/spikes.md, docs/eval-results/README.md).
 The README will carry measured numbers or state that none exist yet.
 
 ## 10. Failure modes
@@ -950,18 +983,32 @@ Explicitly out of scope. Listed so that the absence of each is a decision rather
 
 ## 13. Open items
 
-1. Whether `@cf/meta/llama-3.3-70b-instruct-fp8-fast` is callable on a Workers Free account, and at
-   what rate limit. UNVERIFIED; the docs suggest yes at 300 per minute (docs/spikes.md, 0.1). The
-   planned fallback, `@cf/meta/llama-3.1-8b-instruct`, was deprecated on 2026-05-30, so a new
-   fallback must be chosen if 0.1 fails.
-2. Whether a Durable Object RPC call refreshes the 10 ms CPU budget. UNVERIFIED (docs/spikes.md,
-   0.2). The Workflow's chunk loops use RPC until measured.
-3. Structured output reliability for rule drafting. UNVERIFIED (docs/spikes.md, 0.4). The harness
-   is built; it needs the account.
+1. ~~Whether `@cf/meta/llama-3.3-70b-instruct-fp8-fast` is callable on the account, and at what rate
+   limit~~. Closed: measured on the account, 400/400 requests succeeded, zero rate-limited, ~15.3
+   req/s sustained (docs/spikes.md, 0.1). No fallback model needed.
+2. ~~Whether a Durable Object RPC call refreshes the 10 ms CPU budget~~. Measured on the account
+   (docs/spikes.md, 0.2): no single RPC call triggered `exceededCpu` up to 512,000,000 loop
+   iterations. Kept RPC for the chunk loops; the deeper question of whether this account enforces
+   the 10 ms budget at all on this call path stays open, see docs/spikes.md 0.2.
+3. **Structured output reliability for rule drafting. MEASURED and failing; fallback in progress**
+   (docs/spikes.md, 0.4). The original nested-`$ref` AST-as-JSON-Schema encoding: 0/30 attempts
+   produced valid JSON, running away into an unboundedly deep nested `"or"` chain. Fallback 1
+   (flatten the schema to a node list with integer id references, `RULE_JSON_SCHEMA` in
+   `src/core/rules/schema.ts`) is implemented and was re-measured: still fails, 0/30 schema-valid,
+   because the model just ran away in sibling count instead of depth, building a 64-node tree of
+   pure `and`/`or` with zero leaf conditions. Fallback 2 (split leaf kinds by value type —
+   `compareString`/`compareNumber`, `inStrings`/`inNumbers` — removing every union-typed field from
+   the schema) is implemented and unit-tested but **not yet re-measured against the account**: the
+   account's 10,000/day free neuron allocation was exhausted measuring fallback 1 and diagnosing the
+   failure mode. Re-run `node scripts/run-spikes.mjs <url> structured 10` once the allocation resets
+   and update docs/spikes.md before treating this as resolved. Until it is, the model-drafted-rule
+   step of the Phase 1 demo fails visibly rather than producing a rule, which is the designed
+   behavior for an unhandled model failure (section 10), just not the intended common case.
 4. ~~Measured requests-per-10 ms~~. Closed: `CHUNK_SIZE = 500`, `requestCount = 6000`, measured
    locally (docs/spikes.md, 0.3). Re-check `exceededCpu` on the account.
 5. Grammar. Implemented as section 7 describes; Abhishek to review and own it.
 6. Repo name. The assignment specifies `cf_sw_project`; this repository is `cf-swe-project`. Worth
    reconciling before submission since the name was an explicit requirement.
-7. Nothing has been deployed. Deploying needs the account; the local demo runs with
-   `wrangler dev --local` and the fake model (README).
+7. ~~Nothing has been deployed~~. `spikes/` is deployed to `pragyna-portcullis.workers.dev`
+   (docs/spikes.md). The main app (`portcullis`) deploy is tracked separately in PLAN.md's Phase 1
+   status.
